@@ -20,5 +20,24 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: [ 'controller.service_arguments' ]
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+#    App\Request\ParamConverter\ItemConverter:
+#        tags:
+#            - { name: 'request.param_converter', priority: 1 }
+#    App\Request\ParamConverter\PutConverter:
+#        tags:
+#            - { name: 'request.param_converter', priority: 0 }
+#    App\Request\ParamConverter\PostConverter:
+#        tags:
+#            - { name: 'request.param_converter', priority: 255 }
+    acme_api.event.authentication_success_listener:
+        class: App\EventListener\AuthenticationSuccessListener
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
