@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Currency;
+use App\Entity\Equipment;
+use App\Entity\Item;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class CurrencyRepository extends ServiceEntityRepository
+class EquipmentRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Currency::class);
+        parent::__construct($registry, Equipment::class);
     }
 
-    public function findWalletByUserIndexed(User $user)
+    public function findEquipementsByUser(User $user)
     {
-        return $this->createQueryBuilder('c')
-            ->select(['ct.label', 'c.amount'])
-            ->join('c.currencyType', 'ct')
+        return $this->createQueryBuilder('e')
             ->where(' c.user = :user')
             ->setParameter('user', $user)
             ->getQuery()

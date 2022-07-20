@@ -12,10 +12,8 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\Table;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[Table(name: 'wallet')]
 #[Entity(repositoryClass: CurrencyRepository::class)]
 class Currency
 {
@@ -24,10 +22,9 @@ class Currency
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ManyToOne(targetEntity: User::class, inversedBy: 'wallet')]
+    #[ManyToOne(targetEntity: Wallet::class, inversedBy: 'currencies')]
     #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    #[Groups(['get'])]
-    private User $user;
+    private Wallet $wallet;
 
     #[ManyToOne(targetEntity: CurrencyType::class)]
     #[JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -38,21 +35,25 @@ class Currency
     #[Groups(['get'])]
     private int $amount;
 
+    public function __construct(CurrencyType $currencyType, int $amount)
+    {
+        $this->currencyType = $currencyType;
+        $this->amount = $amount;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getWallet(): Wallet
     {
-        return $this->user;
+        return $this->wallet;
     }
 
-    public function setUser(?User $user): self
+    public function setWallet(Wallet $wallet): void
     {
-        $this->user = $user;
-
-        return $this;
+        $this->wallet = $wallet;
     }
 
     public function getCurrencyType(): ?CurrencyType

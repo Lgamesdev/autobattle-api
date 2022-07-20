@@ -8,100 +8,72 @@ use App\Entity\Currency;
 use App\Entity\User;
 use App\Repository\CurrencyRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/wallet', name: 'api_wallet_')]
 class WalletController
 {
-    #[Route(name: 'collection_get', methods: [Request::METHOD_GET])]
-    public function collection(CurrencyRepository $currencyRepository, SerializerInterface $serializer): JsonResponse
+    private TokenStorageInterface $tokenStorage;
+
+    public function __construct( TokenStorageInterface $storage)
     {
+        $this->tokenStorage = $storage;
+    }
+
+    #[Route(name: 'get_collection', methods: [Request::METHOD_GET])]
+    public function getUserWallet(CurrencyRepository $currencyRepository,
+                                SerializerInterface $serializer): JsonResponse
+    {
+        $user = $this->getCurrentUser();
+
+        $wallet = $currencyRepository->findWalletByUserIndexed($user);
+
         return new JsonResponse(
-            $serializer->serialize($currencyRepository->findAll(), 'json', ['groups' => 'get']),
+            $serializer->serialize($wallet, 'json', ['groups' => 'get']),
             Response::HTTP_OK,
             [],
             true
         );
     }
 
-    #[Route('/{id}', name: 'item_get', methods: [Request::METHOD_GET])]
-    public function item(Currency $currency, SerializerInterface $serializer) : JsonResponse
-    {
-        return new JsonResponse(
-            $serializer->serialize($currency, 'json', ['groups' => 'get']),
-            Response::HTTP_OK,
-            [],
-            true
-        );
-    }
-
-    #[Route(name: 'item_post', methods: [Request::METHOD_POST])]
-    #[ParamConverter('currency', converter: 'api_converter')]
-    public function post(
+    #[Route(name: 'put', methods: [Request::METHOD_PUT])]
+    public function updateCurrency(
         Currency $currency,
         EntityManagerInterface $entityManager,
         SerializerInterface $serializer,
-        UrlGeneratorInterface $urlGenerator,
         ValidatorInterface $validator): JsonResponse
     {
+        $errors = $validator->validate($currency);
+
+        if($errors->count() > 0) {
+            return new JsonResponse(
+                $serializer->serialize($errors, 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],
+                true);
+        }
+
+        $user = $this->getCurrentUser();
+
+        $user->getWallet()->addCurrency($currency);
+
 //        /** @var Currency $currency */
-//        $currency = $serializer->deserialize($request->getContent(), Currency::class, 'json');
-        $currency->setUser($entityManager->getRepository(User::class)->findOneBy([]));
-
-        $errors = $validator->validate($currency);
-
-        if($errors->count() > 0) {
-            return new JsonResponse(
-                $serializer->serialize($errors, 'json'),
-                Response::HTTP_BAD_REQUEST,
-                [],
-                true);
-        }
-
-        $entityManager->persist($currency);
-        $entityManager->flush();
-
-        return new JsonResponse(
-            $serializer->serialize($currency, 'json', ['groups' => 'get']),
-            Response::HTTP_CREATED,
-            ["Location" => $urlGenerator->generate('api_wallet_item_get', ['id' => $currency->getId()])],
-            true
-        );
-    }
-
-    #[Route('/{id}', name: 'item_put', methods: [Request::METHOD_PUT])]
-    public function put(
-        Currency $currency,
-        Request $request,
-        EntityManagerInterface $entityManager,
-        SerializerInterface $serializer,
-        ValidatorInterface $validator): JsonResponse
-    {
-        $errors = $validator->validate($currency);
-
-        if($errors->count() > 0) {
-            return new JsonResponse(
-                $serializer->serialize($errors, 'json'),
-                Response::HTTP_BAD_REQUEST,
-                [],
-                true);
-        }
-
-        /** @var Currency $currency */
-        $currency = $serializer->deserialize(
-            $request->getContent(),
-            Currency::class,
-            'json',
-            [AbstractNormalizer::OBJECT_TO_POPULATE => $currency]
-        );
+//        $currency = $serializer->deserialize(
+//            $request->getContent(),
+//            Currency::class,
+//            'json',
+//            [AbstractNormalizer::OBJECT_TO_POPULATE => $currency]
+//        );
 
         $entityManager->persist($currency);
         $entityManager->flush();
@@ -109,14 +81,11 @@ class WalletController
         return new JsonResponse(null,Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/{id}', name: 'item_delete', methods: [Request::METHOD_DELETE])]
-    public function delete(
-        Currency $currency,
-        EntityManagerInterface $entityManager): JsonResponse
+    public function getCurrentUser(): User
     {
-        $entityManager->remove($currency);
-        $entityManager->flush();
+        /** @var User $user */
+        $user = $this->tokenStorage->getToken()->getUser();
 
-        return new JsonResponse(null,Response::HTTP_NO_CONTENT);
+        return $user;
     }
 }

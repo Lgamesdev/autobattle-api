@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\CurrencyType;
 use App\Entity\User;
+use App\Repository\CurrencyTypeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -33,7 +35,6 @@ final class AuthController extends AbstractController
     {
         /** @var User $user */
         $user = $serializer->deserialize($request->getContent(), User::class, 'json');
-        //todo: maybe add a setWallet()
 
         $errors = $validator->validate($user);
 
@@ -46,6 +47,13 @@ final class AuthController extends AbstractController
         }
 
         $user->setPassword($userPasswordHasher->hashPassword($user, $user->getPassword()));
+
+        /** @var array<array-key, CurrencyType> $currencyTypes */
+        $currencyTypes = $entityManager->getRepository(CurrencyType::class)->findAllIndexed();
+
+        $user->currency($currencyTypes['Gold'], rand(125, 175));
+        $user->currency($currencyTypes['Crystal'], rand(35, 65));
+
         $entityManager->persist($user);
 
         $jwtToken = $JWTTokenManager->create($user);
@@ -56,7 +64,7 @@ final class AuthController extends AbstractController
 
         return new JsonResponse(
             $serializer->serialize([
-                'username' => $user->getUsername(),
+                'user' => $user->getUsername(),
                 'token' => $jwtToken,
                 'refresh_token' => $refreshToken->getRefreshToken(),
                 'refresh_token_expiration' => $refreshToken->getValid()

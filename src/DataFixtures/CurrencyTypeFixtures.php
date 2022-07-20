@@ -12,12 +12,13 @@ final class CurrencyTypeFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        $gold = new CurrencyType();
+        $gold->setLabel('Gold');
+        $manager->persist($gold);
 
-        for($i = 1; $i <= 5; ++$i) {
-            $currencyType = new CurrencyType();
-            $currencyType->setLabel(sprintf('CURR%d', $i));
-            $manager->persist($currencyType);
-        }
+        $crystal = new CurrencyType();
+        $crystal->setLabel('Crystal');
+        $manager->persist($crystal);
 
         $manager->flush();
     }
