@@ -45,11 +45,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 	#[Column(type: Types::STRING)]
 	private string $password;
 
-    #[OneToOne(targetEntity: Inventory::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Inventory $inventory;
-
     #[OneToOne(targetEntity: Body::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Body $body;
+
+    #[OneToOne(targetEntity: Inventory::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Inventory $inventory;
 
     #[Column(type: Types::BOOLEAN)]
     private bool $creationDone = false;
@@ -59,6 +59,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 	public function __construct()
 	{
+        $this->body = new Body();
+        $this->body->setUser($this);
+
         $this->wallet = new Wallet();
         $this->wallet->setUser($this);
 
@@ -116,79 +119,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 		return $this;
 	}
 
+    public function getBody(): Body
+    {
+        return $this->body;
+    }
+
     public function getInventory(): Inventory
     {
         return $this->inventory;
-    }
-
-    public function getHairIndex(): int
-    {
-        return $this->hairIndex;
-    }
-
-    public function setHairIndex(int $hairIndex): void
-    {
-        $this->hairIndex = $hairIndex;
-    }
-
-    public function getBeardIndex(): int
-    {
-        return $this->beardIndex;
-    }
-
-    public function setBeardIndex(int $beardIndex): void
-    {
-        $this->beardIndex = $beardIndex;
-    }
-
-    public function getBodyIndex(): int
-    {
-        return $this->bodyIndex;
-    }
-
-    public function setBodyIndex(int $bodyIndex): void
-    {
-        $this->bodyIndex = $bodyIndex;
-    }
-
-    public function getHairColor(): string
-    {
-        return $this->hairColor;
-    }
-
-    public function setHairColor(string $hairColor): void
-    {
-        $this->hairColor = $hairColor;
-    }
-
-    public function getSkinColor(): string
-    {
-        return $this->skinColor;
-    }
-
-    public function setSkinColor(string $skinColor): void
-    {
-        $this->skinColor = $skinColor;
-    }
-
-    public function getBodyPrimaryColor(): string
-    {
-        return $this->bodyPrimaryColor;
-    }
-
-    public function setBodyPrimaryColor(string $bodyPrimaryColor): void
-    {
-        $this->bodyPrimaryColor = $bodyPrimaryColor;
-    }
-
-    public function getBodySecondaryColor(): string
-    {
-        return $this->bodySecondaryColor;
-    }
-
-    public function setBodySecondaryColor(string $bodySecondaryColor): void
-    {
-        $this->bodySecondaryColor = $bodySecondaryColor;
     }
 
     public function isCreationDone(): bool
@@ -223,64 +161,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     function eraseCredentials()
     {
-    }
-
-    public function setRandomCustomization()
-    {
-        $skinColorArray = [
-            "FFE9C6",
-            "FFD8A0",
-            "D8C19F",
-            "D8AC6C",
-            "D89774",
-            "D1925F",
-            "BF8759",
-            "86644C",
-            "3D2D22",
-        ];
-
-        $hairColorArray = [
-            "503D30",
-            "D4B60C",
-            "5B4636",
-            "000000",
-            "5B5B5B",
-            "BCBCBC",
-            "564336",
-        ];
-
-        $this->setSkinColor('#' . $skinColorArray[array_rand($skinColorArray)]);
-        $this->setHairColor('#' . $hairColorArray[array_rand($hairColorArray)]);
-
-        //30% chances to be bald
-        if(rand(0, 100) < 70)
-        {
-            $this->setHairIndex(rand(0, 4));
-        } else {
-            $this->setHairIndex(-1);
-        }
-        //30% chances to be with no beard
-        if(rand(0, 100) < 70)
-        {
-            $this->setBeardIndex(rand(0, 4));
-        } else {
-            $this->setBeardIndex(-1);
-        }
-
-        $this->setBodyIndex(rand(0, 4));
-    }
-
-    public function getUserBody(): array
-    {
-        return [
-            "hairIndex" => $this->getHairIndex(),
-            "beardIndex" => $this->getBeardIndex(),
-            "bodyIndex" => $this->getBodyIndex(),
-            "hairColor" => $this->getHairColor(),
-            "skinColor" => $this->getSkinColor(),
-            "bodyPrimaryColor" => $this->getBodyPrimaryColor(),
-            "bodySecondaryColor" => $this->getBodySecondaryColor(),
-        ];
     }
 
     public function getUserInfos(): array

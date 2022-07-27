@@ -27,7 +27,7 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
             $user->setUsername(sprintf('user+%d', $i));
             $user->setEmail(sprintf('user+%d@email.com', $i));
             $user->setPassword($this->userPasswordHarsher->hashPassword($user, 'password'));
-            $user->setRandomCustomization();
+            $user->getBody()->setRandomCustomization();
 
             foreach ($currencyTypes as $currencyType)
             {

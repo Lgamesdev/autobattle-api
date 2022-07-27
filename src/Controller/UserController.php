@@ -2,14 +2,21 @@
 
 namespace App\Controller;
 
+use App\Entity\Body;
+use App\Entity\CurrencyType;
 use App\Entity\User;
 use App\Repository\CurrencyRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/user', name: 'api_user_')]
 class UserController
@@ -43,6 +50,38 @@ class UserController
         return new JsonResponse(
             $serializer->serialize($user->getUserInfos(), 'json'),
             Response::HTTP_OK,
+            [],
+            true
+        );
+    }
+
+    #[Route('/body', name: 'post_body', methods: Request::METHOD_POST)]
+    public function setUserBody(Request $request,
+                             SerializerInterface $serializer,
+                             ValidatorInterface $validator,
+                             UserPasswordHasherInterface $userPasswordHasher,
+                             EntityManagerInterface $entityManager,
+                             JWTTokenManagerInterface $JWTTokenManager,
+                             RefreshTokenGeneratorInterface $refreshTokenManager) : JsonResponse
+    {
+        /** @var Body $body */
+        $body = $serializer->deserialize($request->getContent(), Body::class, 'json');
+
+        $errors = $validator->validate($body);
+
+        if (count($errors) > 0) {
+            return new JsonResponse(
+                $serializer->serialize($errors, 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],
+                true);
+        }
+
+        $entityManager->persist($body);
+
+        return new JsonResponse(
+            null,
+            Response::HTTP_CREATED,
             [],
             true
         );
