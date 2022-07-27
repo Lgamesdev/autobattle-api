@@ -56,7 +56,7 @@ class UserController
     }
 
     #[Route('/body', name: 'post_body', methods: Request::METHOD_POST)]
-    public function setUserBody(Request $request,
+    public function postUserBody(Request $request,
                              SerializerInterface $serializer,
                              ValidatorInterface $validator,
                              UserPasswordHasherInterface $userPasswordHasher,
@@ -79,12 +79,7 @@ class UserController
 
         $entityManager->persist($body);
 
-        return new JsonResponse(
-            null,
-            Response::HTTP_CREATED,
-            [],
-            true
-        );
+        return new JsonResponse(null, Response::HTTP_CREATED);
     }
 
     public function getCurrentUser(): User
