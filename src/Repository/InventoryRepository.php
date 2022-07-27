@@ -20,7 +20,7 @@ class InventoryRepository extends ServiceEntityRepository
     public function findInventoryByUser(User $user)
     {
         return $this->createQueryBuilder('i')
-            ->where(' c.user = :user')
+            ->where(' i.user = :user')
             ->setParameter('user', $user)
             ->getQuery()
             ->getResult();
