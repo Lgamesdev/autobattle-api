@@ -21,7 +21,7 @@ class EquipmentRepository extends ServiceEntityRepository
     public function findEquipementsByUser(User $user)
     {
         return $this->createQueryBuilder('e')
-            ->where(' c.user = :user')
+            ->where(' e.user = :user')
             ->setParameter('user', $user)
             ->getQuery()
             ->getResult();
