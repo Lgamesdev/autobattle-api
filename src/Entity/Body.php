@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\BodyRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\OneToOne;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[Entity]
+#[Entity(repositoryClass: BodyRepository::class)]
 class Body
 {
     #[Id]
@@ -83,6 +84,16 @@ class Body
         $this->user = $user;
     }
 
+    public function isMaleGender(): bool
+    {
+        return $this->isMaleGender;
+    }
+
+    public function setIsMaleGender(bool $isMaleGender): void
+    {
+        $this->isMaleGender = $isMaleGender;
+    }
+
     public function getHairIndex(): int
     {
         return $this->hairIndex;
@@ -93,6 +104,16 @@ class Body
         $this->hairIndex = $hairIndex;
     }
 
+    public function getMoustacheIndex(): int
+    {
+        return $this->moustacheIndex;
+    }
+
+    public function setMoustacheIndex(int $moustacheIndex): void
+    {
+        $this->moustacheIndex = $moustacheIndex;
+    }
+
     public function getBeardIndex(): int
     {
         return $this->beardIndex;
@@ -101,16 +122,6 @@ class Body
     public function setBeardIndex(int $beardIndex): void
     {
         $this->beardIndex = $beardIndex;
-    }
-
-    public function getBodyIndex(): int
-    {
-        return $this->bodyIndex;
-    }
-
-    public function setBodyIndex(int $bodyIndex): void
-    {
-        $this->bodyIndex = $bodyIndex;
     }
 
     public function getHairColor(): string
@@ -133,57 +144,67 @@ class Body
         $this->skinColor = $skinColor;
     }
 
-    public function getBodyPrimaryColor(): string
+    public function getChestColor(): string
     {
-        return $this->bodyPrimaryColor;
+        return $this->chestColor;
     }
 
-    public function setBodyPrimaryColor(string $bodyPrimaryColor): void
+    public function setChestColor(string $chestColor): void
     {
-        $this->bodyPrimaryColor = $bodyPrimaryColor;
+        $this->chestColor = $chestColor;
     }
 
-    public function getBodySecondaryColor(): string
+    public function getBeltColor(): string
     {
-        return $this->bodySecondaryColor;
+        return $this->beltColor;
     }
 
-    public function setBodySecondaryColor(string $bodySecondaryColor): void
+    public function setBeltColor(string $beltColor): void
     {
-        $this->bodySecondaryColor = $bodySecondaryColor;
+        $this->beltColor = $beltColor;
+    }
+
+    public function getShortColor(): string
+    {
+        return $this->shortColor;
+    }
+
+    public function setShortColor(string $shortColor): void
+    {
+        $this->shortColor = $shortColor;
     }
 
     public function setRandomCustomization()
     {
         $skinColorArray = [
-            "FFE9C6",
-            "FFD8A0",
-            "D8C19F",
-            "D8AC6C",
-            "D89774",
-            "D1925F",
-            "BF8759",
-            "86644C",
-            "3D2D22",
+            "#FFE9C6",
+            "#FFD8A0",
+            "#D8C19F",
+            "#D8AC6C",
+            "#D89774",
+            "#D1925F",
+            "#BF8759",
+            "#86644C",
+            "#3D2D22",
         ];
 
         $hairColorArray = [
-            "503D30",
-            "D4B60C",
-            "5B4636",
-            "000000",
-            "5B5B5B",
-            "BCBCBC",
-            "564336",
+            "#503D30",
+            "#D4B60C",
+            "#5B4636",
+            "#000000",
+            "#5B5B5B",
+            "#BCBCBC",
+            "#564336",
         ];
 
-        $this->setSkinColor('#' . $skinColorArray[array_rand($skinColorArray)]);
-        $this->setHairColor('#' . $hairColorArray[array_rand($hairColorArray)]);
+        $this->setSkinColor($skinColorArray[array_rand($skinColorArray)]);
+        $this->setHairColor($hairColorArray[array_rand($hairColorArray)]);
 
         //Random gender
-        $this->isMaleGender = rand(0, 100) < 50;
+        $this->setIsMaleGender(rand(0, 100) < 50);
 
-        if($this->isMaleGender)
+        if($this->isMaleGender())
         {
             //30% chances to be bald
             if(rand(0, 100) < 70)
@@ -191,6 +212,13 @@ class Body
                 $this->setHairIndex(rand(1, 4));
             } else {
                 $this->setHairIndex(0);
+            }
+            //30% chances to be with no moustache
+            if(rand(0, 100) < 70)
+            {
+                $this->setMoustacheIndex(rand(1, 4));
+            } else {
+                $this->setMoustacheIndex(0);
             }
             //30% chances to be with no beard
             if(rand(0, 100) < 70)
@@ -200,20 +228,19 @@ class Body
                 $this->setBeardIndex(0);
             }
         }
-
-        $this->setBodyIndex(rand(0, 4));
     }
 
     public function toArray(): array
     {
         return [
             "hairIndex" => $this->getHairIndex(),
+            "moustacheIndex" => $this->getMoustacheIndex(),
             "beardIndex" => $this->getBeardIndex(),
-            "bodyIndex" => $this->getBodyIndex(),
             "hairColor" => $this->getHairColor(),
             "skinColor" => $this->getSkinColor(),
-            "bodyPrimaryColor" => $this->getBodyPrimaryColor(),
-            "bodySecondaryColor" => $this->getBodySecondaryColor(),
+            "chestColor" => $this->getChestColor(),
+            "beltColor" => $this->getBeltColor(),
+            "shortColor" => $this->getShortColor(),
         ];
     }
 }
