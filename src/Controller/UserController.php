@@ -59,10 +59,7 @@ class UserController
     public function postUserBody(Request $request,
                              SerializerInterface $serializer,
                              ValidatorInterface $validator,
-                             UserPasswordHasherInterface $userPasswordHasher,
-                             EntityManagerInterface $entityManager,
-                             JWTTokenManagerInterface $JWTTokenManager,
-                             RefreshTokenGeneratorInterface $refreshTokenManager) : JsonResponse
+                             EntityManagerInterface $entityManager) : JsonResponse
     {
         /** @var Body $body */
         $body = $serializer->deserialize($request->getContent(), Body::class, 'json');
@@ -79,7 +76,7 @@ class UserController
 
         $entityManager->persist($body);
 
-        return new JsonResponse(null, Response::HTTP_CREATED);
+        return new JsonResponse($body->toArray(), Response::HTTP_CREATED);
     }
 
     public function getCurrentUser(): User
