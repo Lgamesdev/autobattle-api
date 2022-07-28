@@ -61,12 +61,8 @@ class UserController
                              ValidatorInterface $validator,
                              EntityManagerInterface $entityManager) : JsonResponse
     {
-        var_dump($request->getContent());
-
         /** @var Body $body */
         $body = $serializer->deserialize($request->getContent(), Body::class, 'json');
-        $body->setUser($this->getCurrentUser());
-
 
         $errors = $validator->validate($body);
 
@@ -78,6 +74,7 @@ class UserController
                 true);
         }
 
+        $body->setUser($this->getCurrentUser());
         $entityManager->persist($body);
 
         return new JsonResponse($body->toArray(), Response::HTTP_CREATED);
