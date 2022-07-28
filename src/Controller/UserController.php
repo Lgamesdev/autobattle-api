@@ -63,6 +63,7 @@ class UserController
     {
         /** @var Body $body */
         $body = $serializer->deserialize($request->getContent(), Body::class, 'json');
+        $body->setUser($this->getCurrentUser());
 
         $errors = $validator->validate($body);
 
