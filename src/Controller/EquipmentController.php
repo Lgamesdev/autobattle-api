@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\CurrencyRepository;
+use App\Repository\WalletRepository;
 use App\Repository\EquipmentRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/equipments', name: 'api_equipments_')]
+#[Route('/user/equipments', name: 'api_equipments_')]
 class EquipmentController
 {
     private TokenStorageInterface $tokenStorage;

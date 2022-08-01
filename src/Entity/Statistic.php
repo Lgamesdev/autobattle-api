@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\CurrencyRepository;
+use App\Repository\StatisticRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
-#[Entity(repositoryClass: CurrencyRepository::class)]
-class Currency
+#[Entity(repositoryClass: StatisticRepository::class)]
+class Statistic
 {
     #[Id]
     #[GeneratedValue]

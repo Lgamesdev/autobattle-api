@@ -18,10 +18,10 @@ use Doctrine\ORM\Mapping\OneToMany;
 class Equipment extends Item
 {
     /**
-     * Collection of Stat
+     * Collection of Statistic
      * @var Collection
      */
-    #[OneToMany(mappedBy: 'equipment', targetEntity: Stat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[OneToMany(mappedBy: 'equipment', targetEntity: EquipmentStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $stats;
 
     #[ManyToOne(targetEntity: EquipmentSlot::class, inversedBy: 'equipments')]
@@ -44,7 +44,7 @@ class Equipment extends Item
         return $this->stats;
     }
 
-    public function addStat(Stat $stat): self
+    public function addStat(EquipmentStat $stat): self
     {
         if (!$this->stats->contains($stat)) {
             $this->stats[] = $stat;
@@ -54,11 +54,12 @@ class Equipment extends Item
         return $this;
     }
 
-    public function stat(StatType $type, int $value) : void
+    public function stat(Statistic $stat, int $value) : void
     {
-        $newStat = new Stat($type, $value);
-        $newStat->setEquipment($this);
-        $this->stats->add($newStat);
+        $newStat = new EquipmentStat();
+        $newStat->setStat($stat);
+        $newStat->setValue($value);
+        $this->addStat($newStat);
     }
 
     public function getEquipmentSlot(): EquipmentSlot

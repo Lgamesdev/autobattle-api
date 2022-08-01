@@ -17,6 +17,7 @@ class AuthenticationSuccessListener
         }
 
         $data['user'] = $user->getUsername();
+        $data['userConf'] = $user->getCharacter()->getConf();
 
         $event->setData($data);
     }

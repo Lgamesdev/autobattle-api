@@ -3,9 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Body;
+use App\Entity\PlayerCharacter;
 use App\Entity\CurrencyType;
 use App\Entity\User;
-use App\Repository\CurrencyRepository;
+use App\Repository\WalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -35,20 +36,7 @@ class UserController
         $user = $this->getCurrentUser();
 
         return new JsonResponse(
-            $serializer->serialize($user->getUserBody(), 'json'),
-            Response::HTTP_OK,
-            [],
-            true
-        );
-    }
-
-    #[Route('/infos', name: 'get_infos', methods: [Request::METHOD_GET])]
-    public function getUserInfos(SerializerInterface $serializer): JsonResponse
-    {
-        $user = $this->getCurrentUser();
-
-        return new JsonResponse(
-            $serializer->serialize($user->getUserInfos(), 'json'),
+            $serializer->serialize($user->getCharacter()->getBody(), 'json'),
             Response::HTTP_OK,
             [],
             true
@@ -73,11 +61,42 @@ class UserController
                 [],
                 true);
         }
+        $character = $this->getCurrentUser()->getCharacter();
 
-        $body->setUser($this->getCurrentUser());
-        $entityManager->persist($body);
+        if($character->isCreationDone())
+        {
+            return new JsonResponse(
+                null,
+                Response::HTTP_BAD_REQUEST,
+                [],
+                true);
+        }
 
-        return new JsonResponse($body->toArray(), Response::HTTP_CREATED);
+        $character->setBody($body);
+        $character->setCreationDone(true);
+
+        $entityManager->persist($character);
+        $entityManager->flush();
+
+        return new JsonResponse(
+            $serializer->serialize($character->getBody(), 'json'),
+            Response::HTTP_CREATED,
+            [],
+            true
+        );
+    }
+
+    #[Route('/infos', name: 'get_infos', methods: [Request::METHOD_GET])]
+    public function getUserInfos(SerializerInterface $serializer): JsonResponse
+    {
+        $user = $this->getCurrentUser();
+
+        return new JsonResponse(
+            $serializer->serialize($user->getUserInfos(), 'json'),
+            Response::HTTP_OK,
+            [],
+            true
+        );
     }
 
     public function getCurrentUser(): User

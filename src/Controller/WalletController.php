@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Currency;
 use App\Entity\User;
-use App\Repository\CurrencyRepository;
+use App\Repository\WalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
@@ -20,7 +20,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-#[Route('/wallet', name: 'api_wallet_')]
+#[Route('/user/wallet', name: 'api_wallet_')]
 class WalletController
 {
     private TokenStorageInterface $tokenStorage;
@@ -31,8 +31,8 @@ class WalletController
     }
 
     #[Route(name: 'get_collection', methods: [Request::METHOD_GET])]
-    public function getUserWallet(CurrencyRepository $currencyRepository,
-                                SerializerInterface $serializer): JsonResponse
+    public function getUserWallet(WalletRepository    $currencyRepository,
+                                  SerializerInterface $serializer): JsonResponse
     {
         $user = $this->getCurrentUser();
 

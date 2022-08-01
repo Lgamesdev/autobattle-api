@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\CurrencyRepository;
+use App\Repository\WalletRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -12,10 +12,17 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-#[Entity(repositoryClass: CurrencyRepository::class)]
+#[Entity(repositoryClass: WalletRepository::class)]
+#[UniqueEntity(
+    fields: ['character', 'currency'],
+    message: 'This character already got an amount of this currency'
+)]
 class Wallet
 {
     #[Id]
@@ -23,56 +30,49 @@ class Wallet
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[OneToOne(mappedBy: 'wallet', targetEntity: User::class)]
-    private User $user;
+    #[ManyToOne(targetEntity: PlayerCharacter::class, inversedBy: 'wallet')]
+    #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
+    private PlayerCharacter $character;
 
-    /**
-     * Collection of Currency
-     * @var Collection
-     */
-    #[OneToMany(mappedBy: 'wallet', targetEntity: Currency::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $currencies;
+    #[ManyToOne(targetEntity: Currency::class)]
+    #[JoinColumn(name: 'currency_id', referencedColumnName: 'id')]
+    private Currency $currency;
 
-    public function __construct()
-    {
-        $this->currencies = new ArrayCollection();
-    }
+    #[Column(type: Types::INTEGER)]
+    private int $amount;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getCharacter(): PlayerCharacter
     {
-        return $this->user;
+        return $this->character;
     }
 
-    public function setUser(?User $user): self
+    public function setCharacter(PlayerCharacter $character): void
     {
-        $this->user = $user;
-
-        return $this;
+        $this->character = $character;
     }
 
-    function getCurrencies(): Collection
+    public function getCurrency(): Currency
     {
-        return $this->currencies;
+        return $this->currency;
     }
 
-    public function add(Currency $currency): void
+    public function setCurrency(Currency $currency): void
     {
-        $this->currencies[] = $currency;
+        $this->currency = $currency;
     }
 
-    public function addCurrency(Currency $currency): self
+    public function getAmount(): int
     {
-        dd($this->currencies);
+        return $this->amount;
+    }
 
-        if (!$this->currencies->contains($currency)) {
-            $this->currencies[] = $currency;
-        }
-
-        return $this;
+    public function setAmount(int $amount): void
+    {
+        $this->amount = $amount;
     }
 }

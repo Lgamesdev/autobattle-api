@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\CurrencyType;
 use App\Entity\User;
-use App\Repository\CurrencyTypeRepository;
+use App\Repository\CurrencyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -51,8 +51,8 @@ final class AuthController extends AbstractController
         /** @var array<array-key, CurrencyType> $currencyTypes */
         $currencyTypes = $entityManager->getRepository(CurrencyType::class)->findAllIndexed();
 
-        $user->currency($currencyTypes['Gold'], rand(125, 175));
-        $user->currency($currencyTypes['Crystal'], rand(35, 65));
+        $user->getCharacter()->currency($currencyTypes['Gold'], rand(125, 175));
+        $user->getCharacter()->currency($currencyTypes['Crystal'], rand(35, 65));
 
         $entityManager->persist($user);
 

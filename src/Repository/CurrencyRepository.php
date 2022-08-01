@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Currency;
-use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,13 +15,11 @@ class CurrencyRepository extends ServiceEntityRepository
         parent::__construct($registry, Currency::class);
     }
 
-    public function findWalletByUserIndexed(User $user)
+    public function findAllIndexed(): array
     {
         return $this->createQueryBuilder('c')
-            ->select(['ct.label', 'c.amount'])
-            ->join('c.currencyType', 'ct')
-            ->where(' c.user = :user')
-            ->setParameter('user', $user)
+            ->orderBy('c.label', 'ASC')
+            ->indexBy('c', 'c.label')
             ->getQuery()
             ->getResult();
     }

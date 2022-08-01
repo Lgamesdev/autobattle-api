@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\Currency;
-use App\Entity\StatType;
+use App\Entity\Statistic;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class StatTypeRepository extends ServiceEntityRepository
+class StatisticRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, StatType::class);
+        parent::__construct($registry, Statistic::class);
     }
 
     public function findAllIndexed(): array
     {
-        return $this->createQueryBuilder('st')
-            ->orderBy('st.label', 'ASC')
-            ->indexBy('st', 'st.label')
+        return $this->createQueryBuilder('s')
+            ->orderBy('s.label', 'ASC')
+            ->indexBy('s', 's.label')
             ->getQuery()
             ->getResult();
     }

@@ -26,13 +26,10 @@ class Inventory
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[OneToOne(mappedBy: 'inventory', targetEntity: User::class)]
-    private User $user;
+    #[OneToOne(inversedBy: 'inventory', targetEntity: PlayerCharacter::class)]
+    #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
+    private PlayerCharacter $character;
 
-    /**
-     * Collection of Item
-     * @var Collection
-     */
     #[ManyToMany(targetEntity: Item::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[JoinTable(name: 'inventorySlot')]
     private Collection $items;
@@ -55,14 +52,14 @@ class Inventory
         $this->id = $id;
     }
 
-    public function getUser(): User
+    public function getCharacter(): PlayerCharacter
     {
-        return $this->user;
+        return $this->character;
     }
 
-    public function setUser(User $user): void
+    public function setCharacter(PlayerCharacter $character): void
     {
-        $this->user = $user;
+        $this->character = $character;
     }
 
     public function getItems(): Collection
@@ -72,7 +69,7 @@ class Inventory
 
     public function addItem(Item $item): self
     {
-        if (!$this->items->contains($item)) {
+        if (!$this->items->contains($item) && $this->items->count() < $this->space) {
             $this->items[] = $item;
         }
 

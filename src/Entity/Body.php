@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToOne;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -19,8 +20,9 @@ class Body
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[OneToOne(mappedBy: 'body', targetEntity: User::class)]
-    private User $user;
+    #[OneToOne(inversedBy: 'body', targetEntity: PlayerCharacter::class)]
+    #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
+    private PlayerCharacter $character;
 
     #[Column(type: Types::BOOLEAN)]
     private bool $isMaleGender = true;
@@ -58,7 +60,7 @@ class Body
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
-        message: 'The body secondary color must be 6-character hexadecimal color.'
+        message: 'The belt color must be 6-character hexadecimal color.'
     )]
     private string $beltColor = '#c27101';
 
@@ -74,14 +76,14 @@ class Body
         return $this->id;
     }
 
-    public function getUser(): User
+    public function getCharacter(): PlayerCharacter
     {
-        return $this->user;
+        return $this->character;
     }
 
-    public function setUser(User $user): void
+    public function setCharacter(PlayerCharacter $character): void
     {
-        $this->user = $user;
+        $this->character = $character;
     }
 
     public function isMaleGender(): bool
@@ -230,17 +232,18 @@ class Body
         }
     }
 
-    public function toArray(): array
-    {
-        return [
-            "hairIndex" => $this->getHairIndex(),
-            "moustacheIndex" => $this->getMoustacheIndex(),
-            "beardIndex" => $this->getBeardIndex(),
-            "hairColor" => $this->getHairColor(),
-            "skinColor" => $this->getSkinColor(),
-            "chestColor" => $this->getChestColor(),
-            "beltColor" => $this->getBeltColor(),
-            "shortColor" => $this->getShortColor(),
-        ];
-    }
+//    public function toArray(): array
+//    {
+//        return [
+//            "isMaleGender" => $this->isMaleGender(),
+//            "hairIndex" => $this->getHairIndex(),
+//            "moustacheIndex" => $this->getMoustacheIndex(),
+//            "beardIndex" => $this->getBeardIndex(),
+//            "hairColor" => $this->getHairColor(),
+//            "skinColor" => $this->getSkinColor(),
+//            "chestColor" => $this->getChestColor(),
+//            "beltColor" => $this->getBeltColor(),
+//            "shortColor" => $this->getShortColor(),
+//        ];
+//    }
 }

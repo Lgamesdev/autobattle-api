@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use App\Entity\Currency;
-use App\Entity\CurrencyType;
 use App\Entity\Equipment;
 use App\Entity\EquipmentSlot;
-use App\Entity\StatType;
-use App\Entity\User;
+use App\Entity\Statistic;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -21,8 +18,8 @@ final class EquipmentFixtures extends Fixture implements DependentFixtureInterfa
         /** @var array<array-key, EquipmentSlot> $equipmentsSlots */
         $equipmentsSlots = $manager->getRepository(EquipmentSlot::class)->findAll();
 
-        /** @var array<array-key, StatType> $statTypes */
-        $statTypes = $manager->getRepository(StatType::class)->findAll();
+        /** @var array<array-key, Statistic> $statTypes */
+        $statTypes = $manager->getRepository(Statistic::class)->findAll();
 
         foreach ($equipmentsSlots as $equipmentsSlot)
         {
@@ -39,7 +36,7 @@ final class EquipmentFixtures extends Fixture implements DependentFixtureInterfa
                     $statValue = match($statType->getLabel()) {
                         'Health' => rand(30, 60),
                         'Armor', 'Speed' => rand(4, 12),
-                        'Attack' => rand(12, 25),
+                        'Damage' => rand(12, 25),
                         'Critical' => rand(5, 18)
                     };
 
@@ -57,7 +54,7 @@ final class EquipmentFixtures extends Fixture implements DependentFixtureInterfa
     {
         return [
             EquipmentSlotFixtures::class,
-            StatTypeFixtures::class,
+            StatFixtures::class,
         ];
 	}
 }

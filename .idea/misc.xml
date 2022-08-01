@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="SwUserDefinedSpecifications">
-    <option name="specTypeByUrl">
-      <map />
+  <component name="UnattendedHostPersistenceState">
+    <option name="openedFilesInfos">
+      <list>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="754" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/User.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="338" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/UserFixtures.php" />
+        </OpenedFileInfo>
+      </list>
     </option>
   </component>
 </project>

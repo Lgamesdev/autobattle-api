@@ -10,9 +10,6 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -39,34 +36,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank]
 	private string $email;
 
-    #[OneToOne(targetEntity: Wallet::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Wallet $wallet;
+    #[Column(type: Types::STRING)]
+    private string $password;
 
-	#[Column(type: Types::STRING)]
-	private string $password;
-
-    #[OneToOne(targetEntity: Body::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Body $body;
-
-    #[OneToOne(targetEntity: Inventory::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Inventory $inventory;
-
-    #[Column(type: Types::BOOLEAN)]
-    private bool $creationDone = false;
-
-    #[Column(type: Types::BOOLEAN)]
-    private bool $tutorialDone = false;
+    #[OneToOne(mappedBy: 'user', targetEntity: PlayerCharacter::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private PlayerCharacter $character;
 
 	public function __construct()
 	{
-        $this->body = new Body();
-        $this->body->setUser($this);
-
-        $this->wallet = new Wallet();
-        $this->wallet->setUser($this);
-
-        $this->inventory = new Inventory();
-        $this->inventory->setUser($this);
+        $this->character = new PlayerCharacter();
+        $this->character->setUser($this);
 	}
 
 	function getId(): ?int
@@ -96,57 +75,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 		return $this;
 	}
 
-    public function getWallet(): Wallet
+    function getPassword(): string
     {
-        return $this->wallet;
+        return $this->password;
     }
 
-    public function currency(CurrencyType $type, int $amount) : void
+    function setPassword(string $password): self
     {
-        $newCurrency = new Currency($type, $amount);
-        $newCurrency->setWallet($this->wallet);
-        $this->wallet->add($newCurrency);
+        $this->password = $password;
+        return $this;
     }
 
-	function getPassword(): string
-	{
-		return $this->password;
-	}
-
-	function setPassword(string $password): self
-	{
-		$this->password = $password;
-		return $this;
-	}
-
-    public function getBody(): Body
+    function getCharacter(): PlayerCharacter
     {
-        return $this->body;
+        return $this->character;
     }
 
-    public function getInventory(): Inventory
+    function setCharacter(PlayerCharacter $character): void
     {
-        return $this->inventory;
-    }
-
-    public function isCreationDone(): bool
-    {
-        return $this->creationDone;
-    }
-
-    public function setCreationDone(bool $creationDone): void
-    {
-        $this->creationDone = $creationDone;
-    }
-
-    public function isTutorialDone(): bool
-    {
-        return $this->tutorialDone;
-    }
-
-    public function setTutorialDone(bool $tutorialDone): void
-    {
-        $this->tutorialDone = $tutorialDone;
+        $this->character = $character;
     }
 
 	function getRoles(): array
@@ -161,14 +108,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     function eraseCredentials()
     {
-    }
-
-    public function getUserInfos(): array
-    {
-        return [
-            "level" => 1,
-            "creationDone" => $this->isCreationDone(),
-            "tutorialDone" => $this->isTutorialDone()
-        ];
     }
 }

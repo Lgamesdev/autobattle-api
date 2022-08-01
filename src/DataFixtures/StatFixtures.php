@@ -6,31 +6,32 @@ namespace App\DataFixtures;
 
 use App\Entity\CurrencyType;
 use App\Entity\EquipmentSlot;
+use App\Entity\Statistic;
 use App\Entity\StatType;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-final class StatTypeFixtures extends Fixture
+final class StatFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        $health = new StatType();
+        $health = new Statistic();
         $health->setLabel('Health');
         $manager->persist($health);
 
-        $armor = new StatType();
+        $armor = new Statistic();
         $armor->setLabel('Armor');
         $manager->persist($armor);
 
-        $attack = new StatType();
-        $attack->setLabel('Attack');
-        $manager->persist($attack);
+        $damage = new Statistic();
+        $damage->setLabel('Damage');
+        $manager->persist($damage);
 
-        $speed = new StatType();
+        $speed = new Statistic();
         $speed->setLabel('Speed');
         $manager->persist($speed);
 
-        $critical = new StatType();
+        $critical = new Statistic();
         $critical->setLabel('Critical');
         $manager->persist($critical);
 

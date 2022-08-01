@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use App\Entity\CurrencyType;
+use App\Entity\Currency;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -19,19 +19,22 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        /** @var array<array-key, CurrencyType> $currencyTypes */
-        $currencyTypes = $manager->getRepository(CurrencyType::class)->findAll();
+        /** @var array<array-key, Currency> $currencyTypes */
+        $currencyTypes = $manager->getRepository(Currency::class)->findAll();
 
         for($i = 1; $i <= 5; ++$i) {
             $user = new User();
             $user->setUsername(sprintf('user+%d', $i));
             $user->setEmail(sprintf('user+%d@email.com', $i));
             $user->setPassword($this->userPasswordHarsher->hashPassword($user, 'password'));
-            $user->getBody()->setRandomCustomization();
+
+            $character = $user->getCharacter();
+            $character->setName(sprintf('character%d', $i));
+            $character->getBody()->setRandomCustomization();
 
             foreach ($currencyTypes as $currencyType)
             {
-                $user->currency($currencyType, rand(100, 150));
+                $character->currency($currencyType, rand(100, 150));
             }
 
             $manager->persist($user);
@@ -43,7 +46,7 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
     function getDependencies() : array
     {
         return [
-            CurrencyTypeFixtures::class,
+            CurrencyFixtures::class,
         ];
     }
 }
