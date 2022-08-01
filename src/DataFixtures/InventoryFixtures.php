@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use App\Entity\PlayerCharacter;
+use App\Entity\UserCharacter;
 use App\Entity\Equipment;
 use App\Entity\Item;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -16,8 +16,8 @@ final class InventoryFixtures extends Fixture implements DependentFixtureInterfa
 
     public function load(ObjectManager $manager): void
     {
-        /** @var array<array-key, PlayerCharacter> $characters */
-        $characters = $manager->getRepository(PlayerCharacter::class)->findAll();
+        /** @var array<array-key, UserCharacter> $characters */
+        $characters = $manager->getRepository(UserCharacter::class)->findAll();
 
         /** @var array<array-key, Item> $items */
         $items = $manager->getRepository(Item::class)->findAll();

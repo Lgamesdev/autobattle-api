@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Body;
-use App\Entity\PlayerCharacter;
+use App\Entity\UserCharacter;
 use App\Entity\CurrencyType;
 use App\Entity\User;
 use App\Repository\WalletRepository;

@@ -30,9 +30,9 @@ class Wallet
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ManyToOne(targetEntity: PlayerCharacter::class, inversedBy: 'wallet')]
+    #[ManyToOne(targetEntity: UserCharacter::class, inversedBy: 'wallet')]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
-    private PlayerCharacter $character;
+    private UserCharacter $character;
 
     #[ManyToOne(targetEntity: Currency::class)]
     #[JoinColumn(name: 'currency_id', referencedColumnName: 'id')]
@@ -46,12 +46,12 @@ class Wallet
         return $this->id;
     }
 
-    public function getCharacter(): PlayerCharacter
+    public function getCharacter(): UserCharacter
     {
         return $this->character;
     }
 
-    public function setCharacter(PlayerCharacter $character): void
+    public function setCharacter(UserCharacter $character): void
     {
         $this->character = $character;
     }

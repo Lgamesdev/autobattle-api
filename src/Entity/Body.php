@@ -20,9 +20,9 @@ class Body
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[OneToOne(inversedBy: 'body', targetEntity: PlayerCharacter::class)]
+    #[OneToOne(inversedBy: 'body', targetEntity: UserCharacter::class)]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
-    private PlayerCharacter $character;
+    private UserCharacter $character;
 
     #[Column(type: Types::BOOLEAN)]
     private bool $isMaleGender = true;
@@ -76,12 +76,12 @@ class Body
         return $this->id;
     }
 
-    public function getCharacter(): PlayerCharacter
+    public function getCharacter(): UserCharacter
     {
         return $this->character;
     }
 
-    public function setCharacter(PlayerCharacter $character): void
+    public function setCharacter(UserCharacter $character): void
     {
         $this->character = $character;
     }

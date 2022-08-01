@@ -26,9 +26,9 @@ class Inventory
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[OneToOne(inversedBy: 'inventory', targetEntity: PlayerCharacter::class)]
+    #[OneToOne(inversedBy: 'inventory', targetEntity: UserCharacter::class)]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
-    private PlayerCharacter $character;
+    private UserCharacter $character;
 
     #[ManyToMany(targetEntity: Item::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[JoinTable(name: 'inventorySlot')]
@@ -52,12 +52,12 @@ class Inventory
         $this->id = $id;
     }
 
-    public function getCharacter(): PlayerCharacter
+    public function getCharacter(): UserCharacter
     {
         return $this->character;
     }
 
-    public function setCharacter(PlayerCharacter $character): void
+    public function setCharacter(UserCharacter $character): void
     {
         $this->character = $character;
     }

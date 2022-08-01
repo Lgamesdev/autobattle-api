@@ -24,9 +24,9 @@ class CharacterStat
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ManyToOne(targetEntity: PlayerCharacter::class, inversedBy: 'stats')]
+    #[ManyToOne(targetEntity: UserCharacter::class, inversedBy: 'stats')]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
-    private PlayerCharacter $character;
+    private UserCharacter $character;
 
     #[ManyToOne(targetEntity: Statistic::class)]
     #[JoinColumn(name: 'stat_id', referencedColumnName: 'id')]
@@ -40,12 +40,12 @@ class CharacterStat
         return $this->id;
     }
 
-    public function getCharacter(): PlayerCharacter
+    public function getCharacter(): UserCharacter
     {
         return $this->character;
     }
 
-    public function setCharacter(PlayerCharacter $character): void
+    public function setCharacter(UserCharacter $character): void
     {
         $this->character = $character;
     }

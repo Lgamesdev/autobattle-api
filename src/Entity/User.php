@@ -39,12 +39,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Column(type: Types::STRING)]
     private string $password;
 
-    #[OneToOne(mappedBy: 'user', targetEntity: PlayerCharacter::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private PlayerCharacter $character;
+    #[OneToOne(mappedBy: 'user', targetEntity: UserCharacter::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private UserCharacter $character;
 
 	public function __construct()
 	{
-        $this->character = new PlayerCharacter();
+        $this->character = new UserCharacter();
         $this->character->setUser($this);
 	}
 
@@ -86,12 +86,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    function getCharacter(): PlayerCharacter
+    function getCharacter(): UserCharacter
     {
         return $this->character;
     }
 
-    function setCharacter(PlayerCharacter $character): void
+    function setCharacter(UserCharacter $character): void
     {
         $this->character = $character;
     }

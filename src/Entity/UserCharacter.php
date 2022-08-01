@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[Entity(repositoryClass: CharacterRepository::class)]
 #[UniqueEntity(fields: 'name', message: 'This character\'s name is already used.')]
-class PlayerCharacter
+class UserCharacter
 {
     #[Id]
     #[GeneratedValue]
