@@ -29,7 +29,6 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
             $user->setPassword($this->userPasswordHarsher->hashPassword($user, 'password'));
 
             $character = $user->getCharacter();
-            $character->setName(sprintf('character%d', $i));
             $character->getBody()->setRandomCustomization();
 
             foreach ($currencyTypes as $currencyType)

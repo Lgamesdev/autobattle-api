@@ -85,16 +85,6 @@ class UserCharacter
         $this->user = $user;
     }
 
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
-
     public function getLevel(): int
     {
         return $this->level;

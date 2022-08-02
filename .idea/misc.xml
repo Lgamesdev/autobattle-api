@@ -4,8 +4,20 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="0" />
+          <option name="caretOffset" value="961" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/AuthController.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="1643" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Wallet.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="2720" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/UserCharacter.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="1077" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/UserFixtures.php" />
         </OpenedFileInfo>
       </list>
     </option>
