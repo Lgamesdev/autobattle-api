@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\OneToOne;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: InventoryRepository::class)]
 class Inventory
@@ -27,10 +28,12 @@ class Inventory
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
+    #[Groups('inventory')]
     #[ManyToMany(targetEntity: Item::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[JoinTable(name: 'inventorySlot')]
     private Collection $items;
 
+    #[Groups('inventory')]
     #[Column(type: Types::INTEGER)]
     private int $space = 28;
 

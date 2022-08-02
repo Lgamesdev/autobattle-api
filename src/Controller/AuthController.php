@@ -63,7 +63,7 @@ final class AuthController extends AbstractController
                 'token' => $jwtToken,
                 'refresh_token' => $refreshToken->getRefreshToken(),
                 'refresh_token_expiration' => $refreshToken->getValid(),
-                'userConf' => $user->getCharacter()->getConf()
+                'playerConf' => $user->getCharacter()->getConf()
             ], 'json'),
             Response::HTTP_CREATED,
             [],

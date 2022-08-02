@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: CharacterRepository::class)]
 #[UniqueEntity(
@@ -28,10 +29,12 @@ class CharacterStat
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
+    #[Groups('characterStat')]
     #[ManyToOne(targetEntity: Statistic::class)]
     #[JoinColumn(name: 'stat_id', referencedColumnName: 'id')]
     private Statistic $stat;
 
+    #[Groups('characterStat')]
     #[Column(type: Types::INTEGER)]
     private int $value;
 

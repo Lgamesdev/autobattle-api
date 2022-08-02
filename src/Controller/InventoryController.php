@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/user/inventory', name: 'api_inventory')]
+#[Route('/user/inventory', name: 'api_inventory_')]
 class InventoryController
 {
     private TokenStorageInterface $tokenStorage;
@@ -32,7 +32,7 @@ class InventoryController
         $inventory = $inventoryRepository->findCharacterInventory($user);
 
         return new JsonResponse(
-            $serializer->serialize($inventory, 'json', ['groups' => 'get']),
+            $serializer->serialize($inventory, 'json', ['groups' => 'inventory']),
             Response::HTTP_OK,
             [],
             true

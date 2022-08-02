@@ -16,7 +16,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-#[Route('/user/wallet', name: 'api_wallet_')]
+#[Route('/user/wallet', name: 'api_user_wallet_')]
 class WalletController
 {
     private TokenStorageInterface $tokenStorage;
@@ -26,16 +26,16 @@ class WalletController
         $this->tokenStorage = $storage;
     }
 
-    #[Route(name: 'get_collection', methods: [Request::METHOD_GET])]
-    public function getUserWallet(WalletRepository $currencyRepository,
+    #[Route(name: 'get', methods: [Request::METHOD_GET])]
+    public function getUserWallet(WalletRepository $repository,
                                   SerializerInterface $serializer): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();
 
-        $wallet = $currencyRepository->findCharacterWallet($character);
+        $wallet = $repository->findCharacterWallet($character);
 
         return new JsonResponse(
-            $serializer->serialize($wallet, 'json', ['groups' => 'get']),
+            $serializer->serialize($wallet, 'json', ['groups' => 'wallet']),
             Response::HTTP_OK,
             [],
             true

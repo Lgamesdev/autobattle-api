@@ -20,7 +20,7 @@ class WalletRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('w')
             ->select(['c.label', 'w.amount'])
-            ->join('w.currencyType', 'c')
+            ->join('w.currency', 'c')
             ->where(' w.character = :character')
             ->setParameter('character', $character)
             ->getQuery()

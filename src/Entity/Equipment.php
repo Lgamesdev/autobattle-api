@@ -10,9 +10,12 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: EquipmentRepository::class)]
 class Equipment extends Item
@@ -21,22 +24,24 @@ class Equipment extends Item
      * Collection of Statistic
      * @var Collection
      */
+    #[Groups('characterEquipment')]
     #[OneToMany(mappedBy: 'equipment', targetEntity: EquipmentStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $stats;
 
-    #[ManyToOne(targetEntity: EquipmentSlot::class, inversedBy: 'equipments')]
-    #[JoinColumn(name: 'equipmentSlot_id', nullable: false)]
+    #[Groups('characterEquipment')]
+    #[ManyToOne(targetEntity: EquipmentSlot::class)]
+    #[JoinColumn(name: 'equipmentSlot_id', referencedColumnName: 'id')]
     private EquipmentSlot $equipmentSlot;
 
+    #[Groups('characterEquipment')]
     #[Column(type: Types::STRING)]
     private string $spritePath;
 
     protected bool $isDefaultItem = false;
 
-    public function __construct(EquipmentSlot $equipmentSlot)
+    public function __construct()
     {
         $this->stats = new ArrayCollection();
-        $this->equipmentSlot = $equipmentSlot;
     }
 
     public function getStats(): Collection

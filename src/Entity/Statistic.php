@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: StatisticRepository::class)]
 class Statistic
@@ -19,9 +20,11 @@ class Statistic
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
+    #[Groups('characterStat')]
     #[Column(type: Types::STRING)]
     private string $label;
 
+    #[Groups('characterStat')]
     #[Column(type: Types::STRING, nullable: true)]
     private string $description;
 

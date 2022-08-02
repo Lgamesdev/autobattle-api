@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\InheritanceType;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: ItemRepository::class)]
 #[InheritanceType('JOINED')]
@@ -20,20 +21,25 @@ use Doctrine\ORM\Mapping\InheritanceType;
 #[DiscriminatorMap(['item' => Item::class, 'equipment' => Equipment::class])]
 class Item
 {
+    #[Groups('inventory')]
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
     protected ?int $id = null;
 
+    #[Groups(['inventory', 'characterEquipment'])]
     #[Column(type: Types::STRING, unique: true)]
     protected string $name;
 
+    #[Groups(['inventory', 'characterEquipment'])]
     #[Column(type: Types::STRING)]
     protected string $iconPath;
 
+    #[Groups('inventory')]
     #[Column(type: Types::BOOLEAN)]
     protected bool $isDefaultItem = true;
 
+    #[Groups('inventory')]
     #[Column(type: Types::INTEGER)]
     protected int $cost;
 

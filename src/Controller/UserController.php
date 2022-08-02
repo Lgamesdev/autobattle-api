@@ -23,22 +23,21 @@ class UserController
         $this->tokenStorage = $storage;
     }
 
-    //TODO : find a method name and $user->function name
     #[Route('/body', name: 'get_body', methods: [Request::METHOD_GET])]
     public function getCharacterBody(SerializerInterface $serializer): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();
 
         return new JsonResponse(
-            $serializer->serialize($character->getBody(), 'json'),
+            $serializer->serialize($character->getBody(), 'json', ['groups' => ['body']]),
             Response::HTTP_OK,
             [],
             true
         );
     }
 
-    #[Route('/body', name: 'post_body', methods: Request::METHOD_POST)]
-    public function postUserBody(Request $request,
+    #[Route('/body', name: 'put_body', methods: Request::METHOD_PUT)]
+    public function putUserBody(Request $request,
                              SerializerInterface $serializer,
                              ValidatorInterface $validator,
                              EntityManagerInterface $entityManager) : JsonResponse
@@ -61,7 +60,7 @@ class UserController
         {
             return new JsonResponse(
                 null,
-                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_FORBIDDEN,
                 [],
                 true);
         }
@@ -73,7 +72,7 @@ class UserController
         $entityManager->flush();
 
         return new JsonResponse(
-            $serializer->serialize($character->getBody(), 'json'),
+            $serializer->serialize($character->getBody(), 'json', ['groups' => ['body']]),
             Response::HTTP_CREATED,
             [],
             true

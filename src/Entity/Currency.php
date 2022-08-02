@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: CurrencyRepository::class)]
 class Currency
@@ -19,9 +20,11 @@ class Currency
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
+    #[Groups('wallet')]
     #[Column(type: Types::STRING)]
     private string $label;
 
+    #[Groups('wallet')]
     #[Column(type: Types::STRING, nullable: true)]
     private string $description;
 

@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: CharacterEquipmentRepository::class)]
 #[UniqueEntity(
@@ -28,14 +29,17 @@ class CharacterEquipment
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
+    #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: Equipment::class)]
     #[JoinColumn(name: 'equipment_id', referencedColumnName: 'id')]
     private Equipment $equipment;
 
+    #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: EquipmentSlot::class)]
     #[JoinColumn(name: 'equipmentSlot_id', referencedColumnName: 'id')]
     private EquipmentSlot $equipmentSlot;
 
+    #[Groups('characterEquipment')]
     #[Column(type: 'array', nullable: true)]
     private array $modifiers = [];
 

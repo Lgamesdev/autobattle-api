@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: CharacterRepository::class)]
 #[UniqueEntity(
@@ -26,9 +27,11 @@ class EquipmentStat
     #[ManyToOne(targetEntity: Equipment::class, inversedBy: 'stats')]
     private Equipment $equipment;
 
+    #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: Statistic::class)]
     private Statistic $stat;
 
+    #[Groups('characterEquipment')]
     #[Column(type: Types::INTEGER)]
     private int $value;
 

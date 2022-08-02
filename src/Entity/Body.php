@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToOne;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[Entity(repositoryClass: BodyRepository::class)]
@@ -24,18 +25,23 @@ class Body
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
+    #[Groups('body')]
     #[Column(type: Types::BOOLEAN)]
     private bool $isMaleGender = true;
 
+    #[Groups('body')]
     #[Column(type: Types::INTEGER)]
     private int $hairIndex = 0;
 
+    #[Groups('body')]
     #[Column(type: Types::INTEGER)]
     private int $moustacheIndex = 0;
 
+    #[Groups('body')]
     #[Column(type: Types::INTEGER)]
     private int $beardIndex = 0;
 
+    #[Groups('body')]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
@@ -43,6 +49,7 @@ class Body
     )]
     private string $hairColor = '#564336';
 
+    #[Groups('body')]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
@@ -50,6 +57,7 @@ class Body
     )]
     private string $skinColor = '#D8C19F';
 
+    #[Groups('body')]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
@@ -57,6 +65,7 @@ class Body
     )]
     private string $chestColor = '#dc0505';
 
+    #[Groups('body')]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
@@ -64,6 +73,7 @@ class Body
     )]
     private string $beltColor = '#c27101';
 
+    #[Groups('body')]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,

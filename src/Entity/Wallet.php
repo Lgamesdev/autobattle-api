@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: WalletRepository::class)]
 #[UniqueEntity(
@@ -30,10 +31,12 @@ class Wallet
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
+    #[Groups('wallet')]
     #[ManyToOne(targetEntity: Currency::class)]
     #[JoinColumn(name: 'currency_id', referencedColumnName: 'id')]
     private Currency $currency;
 
+    #[Groups('wallet')]
     #[Column(type: Types::INTEGER)]
     private int $amount;
 

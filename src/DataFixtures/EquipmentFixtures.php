@@ -24,7 +24,8 @@ final class EquipmentFixtures extends Fixture implements DependentFixtureInterfa
         foreach ($equipmentsSlots as $equipmentsSlot)
         {
             for($i = 1; $i <= 5; ++$i) {
-                $equipment = new Equipment($equipmentsSlot);
+                $equipment = new Equipment();
+                $equipment->setEquipmentSlot($equipmentsSlot);
                 $equipment->setName($equipmentsSlot->getLabel() . $i);
                 $equipment->setIconPath(sprintf('Icon/Equipment/%1$s/%1$s_%2$d.png', $equipmentsSlot->getLabel(), $i));
                 $equipment->setCost(rand(50, 100));

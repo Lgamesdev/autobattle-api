@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/user/equipments', name: 'api_equipments_')]
+#[Route('/user/equipments', name: 'api_user_equipments_')]
 class EquipmentController
 {
     private TokenStorageInterface $tokenStorage;
@@ -23,7 +23,7 @@ class EquipmentController
         $this->tokenStorage = $storage;
     }
 
-    #[Route(name: 'get_collection', methods: [Request::METHOD_GET])]
+    #[Route(name: 'get', methods: [Request::METHOD_GET])]
     public function getUserEquipments(CharacterEquipmentRepository $repository,
                                   SerializerInterface $serializer): JsonResponse
     {
@@ -32,7 +32,7 @@ class EquipmentController
         $equipments = $repository->findCharacterEquipments($character);
 
         return new JsonResponse(
-            $serializer->serialize($equipments, 'json', ['groups' => 'get']),
+            $serializer->serialize($equipments, 'json', ['groups' => 'characterEquipment']),
             Response::HTTP_OK,
             [],
             true
