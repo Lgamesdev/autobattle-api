@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CharacterEquipmentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -10,6 +12,7 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -39,9 +42,18 @@ class CharacterEquipment
     #[JoinColumn(name: 'equipmentSlot_id', referencedColumnName: 'id')]
     private EquipmentSlot $equipmentSlot;
 
+    /**
+     * Collection of Statistic
+     * @var Collection
+     */
     #[Groups('characterEquipment')]
-    #[Column(type: 'array', nullable: true)]
-    private array $modifiers = [];
+    #[OneToMany(mappedBy: 'characterEquipment', targetEntity: CharacterEquipmentStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $modifiers;
+
+    public function __construct()
+    {
+        $this->modifiers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -78,16 +90,18 @@ class CharacterEquipment
         $this->equipmentSlot = $equipmentSlot;
     }
 
-    public function getModifiers(): ?array
+    public function getModifiers(): Collection
     {
         return $this->modifiers;
     }
 
-    public function addModifier(int $value): void
+    public function addModifier(CharacterEquipmentStat $stat): self
     {
-        if ($value != 0) {
-            $this->modifiers[] = $value;
+        if (!$this->modifiers->contains($stat)) {
+            $this->modifiers[] = $stat;
+            $stat->setCharacterEquipment($this);
         }
-    }
 
+        return $this;
+    }
 }

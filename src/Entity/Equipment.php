@@ -20,6 +20,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[Entity(repositoryClass: EquipmentRepository::class)]
 class Equipment extends Item
 {
+    #[Groups('characterEquipment')]
+    #[ManyToOne(targetEntity: EquipmentSlot::class)]
+    #[JoinColumn(name: 'equipmentSlot_id', referencedColumnName: 'id')]
+    private EquipmentSlot $equipmentSlot;
+
     /**
      * Collection of Statistic
      * @var Collection
@@ -27,11 +32,6 @@ class Equipment extends Item
     #[Groups('characterEquipment')]
     #[OneToMany(mappedBy: 'equipment', targetEntity: EquipmentStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $stats;
-
-    #[Groups('characterEquipment')]
-    #[ManyToOne(targetEntity: EquipmentSlot::class)]
-    #[JoinColumn(name: 'equipmentSlot_id', referencedColumnName: 'id')]
-    private EquipmentSlot $equipmentSlot;
 
     #[Groups('characterEquipment')]
     #[Column(type: Types::STRING)]

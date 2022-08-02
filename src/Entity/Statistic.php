@@ -24,7 +24,6 @@ class Statistic
     #[Column(type: Types::STRING)]
     private string $label;
 
-    #[Groups('characterStat')]
     #[Column(type: Types::STRING, nullable: true)]
     private string $description;
 

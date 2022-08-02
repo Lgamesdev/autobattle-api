@@ -2,30 +2,35 @@
 
 namespace App\Entity;
 
-use App\Repository\CharacterRepository;
+use App\Repository\CharacterEquipmentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[Entity(repositoryClass: CharacterRepository::class)]
+#[Entity(repositoryClass: CharacterEquipmentRepository::class)]
 #[UniqueEntity(
-    fields: ['equipment', 'stat'],
-    message: 'This equipment stat already got a value'
+    fields: ['character', 'equipment', 'equipmentSlot'],
+    message: 'This equipmentSlot is already used.'
 )]
-class EquipmentStat
+class CharacterEquipmentStat
 {
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ManyToOne(targetEntity: Equipment::class, inversedBy: 'stats')]
-    private Equipment $equipment;
+    #[Groups('characterEquipment')]
+    #[ManyToOne(targetEntity: CharacterEquipment::class, inversedBy: 'modifiers')]
+    private CharacterEquipment $characterEquipment;
 
     #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: Statistic::class)]
@@ -40,14 +45,14 @@ class EquipmentStat
         return $this->id;
     }
 
-    public function getEquipment(): Equipment
+    public function getCharacterEquipment(): CharacterEquipment
     {
-        return $this->equipment;
+        return $this->characterEquipment;
     }
 
-    public function setEquipment(Equipment $equipment): void
+    public function setCharacterEquipment(CharacterEquipment $equipment): void
     {
-        $this->equipment = $equipment;
+        $this->characterEquipment = $equipment;
     }
 
     public function getStat(): Statistic

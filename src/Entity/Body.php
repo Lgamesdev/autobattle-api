@@ -240,6 +240,8 @@ class Body
                 $this->setBeardIndex(0);
             }
         }
+
+        $this->character->setCreationDone(true);
     }
 
 //    public function toArray(): array
