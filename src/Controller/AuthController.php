@@ -2,22 +2,17 @@
 
 namespace App\Controller;
 
-use App\Entity\CurrencyType;
+use App\Entity\Currency;
 use App\Entity\User;
-use App\Repository\CurrencyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
-use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -48,8 +43,8 @@ final class AuthController extends AbstractController
 
         $user->setPassword($userPasswordHasher->hashPassword($user, $user->getPassword()));
 
-        /** @var array<array-key, CurrencyType> $currencyTypes */
-        $currencyTypes = $entityManager->getRepository(CurrencyType::class)->findAllIndexed();
+        /** @var array<array-key, Currency> $currencyTypes */
+        $currencyTypes = $entityManager->getRepository(Currency::class)->findAllIndexed();
 
         $user->getCharacter()->currency($currencyTypes['Gold'], rand(125, 175));
         $user->getCharacter()->currency($currencyTypes['Crystal'], rand(35, 65));
@@ -67,7 +62,8 @@ final class AuthController extends AbstractController
                 'user' => $user->getUsername(),
                 'token' => $jwtToken,
                 'refresh_token' => $refreshToken->getRefreshToken(),
-                'refresh_token_expiration' => $refreshToken->getValid()
+                'refresh_token_expiration' => $refreshToken->getValid(),
+                'userConf' => $user->getCharacter()->getConf()
             ], 'json'),
             Response::HTTP_CREATED,
             [],

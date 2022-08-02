@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\WalletRepository;
-use App\Repository\EquipmentRepository;
+use App\Repository\CharacterEquipmentRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,18 +18,18 @@ class EquipmentController
 {
     private TokenStorageInterface $tokenStorage;
 
-    public function __construct( TokenStorageInterface $storage)
+    public function __construct(TokenStorageInterface $storage)
     {
         $this->tokenStorage = $storage;
     }
 
     #[Route(name: 'get_collection', methods: [Request::METHOD_GET])]
-    public function getUserEquipments(EquipmentRepository $equipmentRepository,
+    public function getUserEquipments(CharacterEquipmentRepository $repository,
                                   SerializerInterface $serializer): JsonResponse
     {
-        $user = $this->getCurrentUser();
+        $character = $this->getCurrentUser()->getCharacter();
 
-        $equipments = $equipmentRepository->findEquipementsByUser($user);
+        $equipments = $repository->findCharacterEquipments($character);
 
         return new JsonResponse(
             $serializer->serialize($equipments, 'json', ['groups' => 'get']),

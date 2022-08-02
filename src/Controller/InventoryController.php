@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\WalletRepository;
-use App\Repository\EquipmentRepository;
 use App\Repository\InventoryRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +18,7 @@ class InventoryController
 {
     private TokenStorageInterface $tokenStorage;
 
-    public function __construct( TokenStorageInterface $storage)
+    public function __construct(TokenStorageInterface $storage)
     {
         $this->tokenStorage = $storage;
     }
@@ -31,7 +29,7 @@ class InventoryController
     {
         $user = $this->getCurrentUser();
 
-        $inventory = $inventoryRepository->findInventoryByUser($user);
+        $inventory = $inventoryRepository->findCharacterInventory($user);
 
         return new JsonResponse(
             $serializer->serialize($inventory, 'json', ['groups' => 'get']),

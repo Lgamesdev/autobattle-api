@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Body;
 use App\Entity\User;
+use App\Entity\UserCharacter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,11 +17,11 @@ class BodyRepository extends ServiceEntityRepository
         parent::__construct($registry, Body::class);
     }
 
-    public function findUserBody(User $user)
+    public function findCharacterBody(UserCharacter $character)
     {
         return $this->createQueryBuilder('b')
-            ->where(' b.user = :user')
-            ->setParameter('user', $user)
+            ->where(' b.character = :character')
+            ->setParameter('character', $character)
             ->getQuery()
             ->getResult();
     }

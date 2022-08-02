@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\CurrencyType;
 use App\Entity\Inventory;
-use App\Entity\User;
+use App\Entity\UserCharacter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,11 +16,11 @@ class InventoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Inventory::class);
     }
 
-    public function findInventoryByUser(User $user)
+    public function findCharacterInventory(UserCharacter $character)
     {
         return $this->createQueryBuilder('i')
-            ->where(' i.user = :user')
-            ->setParameter('user', $user)
+            ->where(' i.character = :character')
+            ->setParameter('character', $character)
             ->getQuery()
             ->getResult();
     }

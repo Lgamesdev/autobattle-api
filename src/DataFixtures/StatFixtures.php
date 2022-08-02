@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use App\Entity\CurrencyType;
-use App\Entity\EquipmentSlot;
 use App\Entity\Statistic;
-use App\Entity\StatType;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 

@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\Currency;
 use App\Entity\User;
+use App\Entity\Wallet;
 use App\Repository\WalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -25,18 +21,18 @@ class WalletController
 {
     private TokenStorageInterface $tokenStorage;
 
-    public function __construct( TokenStorageInterface $storage)
+    public function __construct(TokenStorageInterface $storage)
     {
         $this->tokenStorage = $storage;
     }
 
     #[Route(name: 'get_collection', methods: [Request::METHOD_GET])]
-    public function getUserWallet(WalletRepository    $currencyRepository,
+    public function getUserWallet(WalletRepository $currencyRepository,
                                   SerializerInterface $serializer): JsonResponse
     {
-        $user = $this->getCurrentUser();
+        $character = $this->getCurrentUser()->getCharacter();
 
-        $wallet = $currencyRepository->findWalletByUserIndexed($user);
+        $wallet = $currencyRepository->findCharacterWallet($character);
 
         return new JsonResponse(
             $serializer->serialize($wallet, 'json', ['groups' => 'get']),
@@ -48,7 +44,7 @@ class WalletController
 
     #[Route(name: 'put', methods: [Request::METHOD_PUT])]
     public function updateCurrency(
-        Currency $currency,
+        Wallet $currency,
         EntityManagerInterface $entityManager,
         SerializerInterface $serializer,
         ValidatorInterface $validator): JsonResponse
@@ -63,9 +59,9 @@ class WalletController
                 true);
         }
 
-        $user = $this->getCurrentUser();
+        $character = $this->getCurrentUser()->getCharacter();
 
-        $user->getWallet()->addCurrency($currency);
+        $character->addCurrency($currency);
 
 //        /** @var Currency $currency */
 //        $currency = $serializer->deserialize(
@@ -75,7 +71,7 @@ class WalletController
 //            [AbstractNormalizer::OBJECT_TO_POPULATE => $currency]
 //        );
 
-        $entityManager->persist($currency);
+        $entityManager->persist($character);
         $entityManager->flush();
 
         return new JsonResponse(null,Response::HTTP_NO_CONTENT);

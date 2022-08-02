@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\Request\ParamConverter;
 
-use App\Entity\Currency;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
 
 class ItemConverter implements ParamConverterInterface
 {
@@ -31,9 +28,9 @@ class ItemConverter implements ParamConverterInterface
     /**
      * @param Request $request
      * @param ParamConverter $configuration
-     * @return bool|void
+     * @return void
      */
-    public function apply(Request $request, ParamConverter $configuration)
+    public function apply(Request $request, ParamConverter $configuration): void
     {
         if(!$request->attributes->has('id')) {
             return;

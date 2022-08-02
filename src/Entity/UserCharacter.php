@@ -29,11 +29,6 @@ class UserCharacter
     #[JoinColumn(name: 'user_id', referencedColumnName: 'id')]
     private User $user;
 
-    #[Column(type: Types::STRING, unique: true)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 4, max: 25)]
-    private string $name;
-
     #[Column(type: Types::INTEGER)]
     #[Assert\Range(notInRangeMessage: "minimum character\'s level must be 1", min: 1)]
     private int $level = 1;

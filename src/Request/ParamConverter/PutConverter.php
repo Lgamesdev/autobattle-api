@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Request\ParamConverter;
 
-use App\Entity\Currency;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,9 +29,9 @@ class PutConverter implements ParamConverterInterface
     /**
      * @param Request $request
      * @param ParamConverter $configuration
-     * @return bool|void
+     * @return void
      */
-    public function apply(Request $request, ParamConverter $configuration)
+    public function apply(Request $request, ParamConverter $configuration): void
     {
         if(!$request->isMethod(Request::METHOD_PUT)) {
             return;
@@ -50,7 +48,7 @@ class PutConverter implements ParamConverterInterface
         $request->attributes->set($configuration->getName(), $object);
     }
 
-    public function supports(ParamConverter $configuration)
+    public function supports(ParamConverter $configuration): bool
     {
         return $configuration->getClass() === User::class;
     }

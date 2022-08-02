@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\User;
+use App\Entity\UserCharacter;
 use App\Entity\Wallet;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,13 +16,13 @@ class WalletRepository extends ServiceEntityRepository
         parent::__construct($registry, Wallet::class);
     }
 
-    public function findWalletByUserIndexed(User $user)
+    public function findCharacterWallet(UserCharacter $character)
     {
-        return $this->createQueryBuilder('c')
-            ->select(['ct.label', 'c.amount'])
-            ->join('c.currencyType', 'ct')
-            ->where(' c.user = :user')
-            ->setParameter('user', $user)
+        return $this->createQueryBuilder('w')
+            ->select(['c.label', 'w.amount'])
+            ->join('w.currencyType', 'c')
+            ->where(' w.character = :character')
+            ->setParameter('character', $character)
             ->getQuery()
             ->getResult();
     }

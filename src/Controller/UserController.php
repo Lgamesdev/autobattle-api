@@ -3,17 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Body;
-use App\Entity\UserCharacter;
-use App\Entity\CurrencyType;
 use App\Entity\User;
-use App\Repository\WalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -24,19 +18,19 @@ class UserController
 {
     private TokenStorageInterface $tokenStorage;
 
-    public function __construct( TokenStorageInterface $storage)
+    public function __construct(TokenStorageInterface $storage)
     {
         $this->tokenStorage = $storage;
     }
 
     //TODO : find a method name and $user->function name
     #[Route('/body', name: 'get_body', methods: [Request::METHOD_GET])]
-    public function getUserBody(SerializerInterface $serializer): JsonResponse
+    public function getCharacterBody(SerializerInterface $serializer): JsonResponse
     {
-        $user = $this->getCurrentUser();
+        $character = $this->getCurrentUser()->getCharacter();
 
         return new JsonResponse(
-            $serializer->serialize($user->getCharacter()->getBody(), 'json'),
+            $serializer->serialize($character->getBody(), 'json'),
             Response::HTTP_OK,
             [],
             true
@@ -89,10 +83,10 @@ class UserController
     #[Route('/infos', name: 'get_infos', methods: [Request::METHOD_GET])]
     public function getUserInfos(SerializerInterface $serializer): JsonResponse
     {
-        $user = $this->getCurrentUser();
+        $character = $this->getCurrentUser()->getCharacter();
 
         return new JsonResponse(
-            $serializer->serialize($user->getUserInfos(), 'json'),
+            $serializer->serialize($character->getConf(), 'json'),
             Response::HTTP_OK,
             [],
             true
