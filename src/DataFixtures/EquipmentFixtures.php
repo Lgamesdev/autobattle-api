@@ -32,16 +32,16 @@ final class EquipmentFixtures extends Fixture implements DependentFixtureInterfa
                 $equipment->setSpritePath(sprintf('Equipment/%1$s/%1$s_%2$d.png', $equipmentsSlot->getLabel(), $i));
                 //$equipment->setIsDefaultItem(false);
 
-                for($x = 1; $x <= rand(2, 4); ++$x) {
-                    $statType = $statTypes[array_rand($statTypes)];
-                    $statValue = match($statType->getLabel()) {
-                        'Health' => rand(30, 60),
-                        'Armor', 'Speed' => rand(4, 12),
-                        'Damage' => rand(12, 25),
-                        'Critical' => rand(5, 18)
-                    };
-
-                    $equipment->stat($statType, $statValue);
+                foreach ($statTypes as $statType) {
+                    if(rand(0, 100) < 50 || ($equipment->getEquipmentSlot()->getLabel() === 'Weapon' && $statType->getLabel() === 'Damage')) {
+                        $statValue = match ($statType->getLabel()) {
+                            'Health' => rand(30, 60),
+                            'Armor', 'Speed' => rand(4, 12),
+                            'Damage' => rand(12, 25),
+                            'Critical' => rand(5, 18)
+                        };
+                        $equipment->stat($statType, $statValue);
+                    }
                 }
 
                 $manager->persist($equipment);

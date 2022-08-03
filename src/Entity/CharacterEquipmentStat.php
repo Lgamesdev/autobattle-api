@@ -2,9 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\CharacterEquipmentRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\CharacterEquipmentStatRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -12,11 +10,10 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToMany;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[Entity(repositoryClass: CharacterEquipmentRepository::class)]
+#[Entity(repositoryClass: CharacterEquipmentStatRepository::class)]
 #[UniqueEntity(
     fields: ['character', 'equipment', 'equipmentSlot'],
     message: 'This equipmentSlot is already used.'

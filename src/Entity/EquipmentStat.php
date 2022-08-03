@@ -27,7 +27,6 @@ class EquipmentStat
     #[ManyToOne(targetEntity: Equipment::class, inversedBy: 'stats')]
     private Equipment $equipment;
 
-    #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: Statistic::class)]
     private Statistic $stat;
 
@@ -58,6 +57,12 @@ class EquipmentStat
     public function setStat(Statistic $stat): void
     {
         $this->stat = $stat;
+    }
+
+    #[Groups('characterEquipment')]
+    public function getLabel(): string
+    {
+        return $this->stat->getLabel();
     }
 
     public function getValue(): int

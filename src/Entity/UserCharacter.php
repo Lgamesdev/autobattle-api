@@ -161,9 +161,14 @@ class UserCharacter
         return $this->equipments;
     }
 
-    public function setEquipments(ArrayCollection|Collection $equipments): void
+    public function addEquipment(CharacterEquipment $equipment): self
     {
-        $this->equipments = $equipments;
+        if (!$this->equipments->contains($equipment)) {
+            $this->equipments[] = $equipment;
+            $equipment->setCharacter($this);
+        }
+
+        return $this;
     }
 
     public function getInventory(): Inventory

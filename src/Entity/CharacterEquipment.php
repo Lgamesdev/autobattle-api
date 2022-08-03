@@ -37,15 +37,10 @@ class CharacterEquipment
     #[JoinColumn(name: 'equipment_id', referencedColumnName: 'id')]
     private Equipment $equipment;
 
-    #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: EquipmentSlot::class)]
     #[JoinColumn(name: 'equipmentSlot_id', referencedColumnName: 'id')]
     private EquipmentSlot $equipmentSlot;
 
-    /**
-     * Collection of Statistic
-     * @var Collection
-     */
     #[Groups('characterEquipment')]
     #[OneToMany(mappedBy: 'characterEquipment', targetEntity: CharacterEquipmentStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $modifiers;
@@ -77,17 +72,13 @@ class CharacterEquipment
 
     public function setEquipment(Equipment $equipment): void
     {
+        $this->equipmentSlot = $equipment->getEquipmentSlot();
         $this->equipment = $equipment;
     }
 
     public function getEquipmentSlot(): EquipmentSlot
     {
         return $this->equipmentSlot;
-    }
-
-    public function setEquipmentSlot(EquipmentSlot $equipmentSlot): void
-    {
-        $this->equipmentSlot = $equipmentSlot;
     }
 
     public function getModifiers(): Collection

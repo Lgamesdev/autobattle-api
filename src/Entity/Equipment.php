@@ -20,15 +20,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[Entity(repositoryClass: EquipmentRepository::class)]
 class Equipment extends Item
 {
-    #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: EquipmentSlot::class)]
     #[JoinColumn(name: 'equipmentSlot_id', referencedColumnName: 'id')]
     private EquipmentSlot $equipmentSlot;
 
-    /**
-     * Collection of Statistic
-     * @var Collection
-     */
     #[Groups('characterEquipment')]
     #[OneToMany(mappedBy: 'equipment', targetEntity: EquipmentStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $stats;
@@ -75,6 +70,12 @@ class Equipment extends Item
     public function setEquipmentSlot(EquipmentSlot $equipmentSlot): void
     {
         $this->equipmentSlot = $equipmentSlot;
+    }
+
+    #[Groups('characterEquipment')]
+    public function getEquipmentType(): string
+    {
+        return $this->equipmentSlot->getLabel();
     }
 
     public function getSpritePath(): string
