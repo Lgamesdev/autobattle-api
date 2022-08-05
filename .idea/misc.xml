@@ -12,12 +12,12 @@
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/UserFixtures.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="764" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Wallet.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
           <option name="caretOffset" value="482" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Repository/WalletRepository.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="764" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Wallet.php" />
         </OpenedFileInfo>
       </list>
     </option>
