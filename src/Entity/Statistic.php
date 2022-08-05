@@ -20,7 +20,7 @@ class Statistic
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[Groups(['characterStat', 'characterEquipment'])]
+    #[Groups(['characterStat'])]
     #[Column(type: Types::STRING)]
     private string $label;
 

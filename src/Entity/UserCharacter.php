@@ -39,8 +39,8 @@ class UserCharacter
     #[OneToOne(mappedBy: 'character', targetEntity: Body::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Body $body;
 
-    #[OneToMany(mappedBy: 'character', targetEntity: Wallet::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $wallet;
+    #[OneToOne(mappedBy: 'character', targetEntity: Wallet::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Wallet $wallet;
 
     #[OneToMany(mappedBy: 'character', targetEntity: CharacterStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $stats;
@@ -65,7 +65,9 @@ class UserCharacter
         $this->inventory = new Inventory();
         $this->inventory->setCharacter($this);
 
-        $this->wallet = new ArrayCollection();
+        $this->wallet = new Wallet();
+        $this->wallet->setCharacter($this);
+
         $this->stats = new ArrayCollection();
         $this->equipments = new ArrayCollection();
     }
@@ -115,29 +117,18 @@ class UserCharacter
         $this->body = $body;
     }
 
-    public function getWallet(): ArrayCollection|Collection
+    public function getWallet(): Wallet
     {
         return $this->wallet;
     }
 
-    public function addCurrency(Wallet $wallet): self
-    {
-        if (!$this->wallet->contains($wallet)) {
-            $this->wallet[] = $wallet;
-            $wallet->setCharacter($this);
-        }
-
-        return $this;
-    }
-
-    //TODO: add currency get the correct object Wallet and add the amount to it
     public function currency(Currency $currency, int $amount) : void
     {
-        $curr = new Wallet();
+        $curr = new CharacterCurrency();
         $curr->setCurrency($currency);
         $curr->setAmount($amount);
 
-        $this->addCurrency($curr);
+        $this->wallet->addCurrency($curr);
 
 //        dd($this->wallet);
 //

@@ -60,7 +60,7 @@ class EquipmentStat
     }
 
     #[Groups('characterEquipment')]
-    public function getLabel(): string
+    public function getStatType(): string
     {
         return $this->stat->getLabel();
     }

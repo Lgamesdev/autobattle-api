@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\WalletRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -12,6 +14,7 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -31,14 +34,14 @@ class Wallet
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
-    #[Groups('wallet')]
-    #[ManyToOne(targetEntity: Currency::class)]
-    #[JoinColumn(name: 'currency_id', referencedColumnName: 'id')]
-    private Currency $currency;
+    #[Groups('characterWallet')]
+    #[OneToMany(mappedBy: 'wallet', targetEntity: CharacterCurrency::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $currencies;
 
-    #[Groups('wallet')]
-    #[Column(type: Types::INTEGER)]
-    private int $amount;
+    public function __construct()
+    {
+        $this->currencies = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -55,23 +58,13 @@ class Wallet
         $this->character = $character;
     }
 
-    public function getCurrency(): Currency
+    public function addCurrency(CharacterCurrency $currency): self
     {
-        return $this->currency;
-    }
+        if (!$this->currencies->contains($currency)) {
+            $this->currencies[] = $currency;
+            $currency->setWallet($this);
+        }
 
-    public function setCurrency(Currency $currency): void
-    {
-        $this->currency = $currency;
-    }
-
-    public function getAmount(): int
-    {
-        return $this->amount;
-    }
-
-    public function setAmount(int $amount): void
-    {
-        $this->amount = $amount;
+        return $this;
     }
 }

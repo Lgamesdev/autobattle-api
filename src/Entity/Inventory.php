@@ -28,12 +28,12 @@ class Inventory
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
-    #[Groups('inventory')]
+    #[Groups('playerInventory')]
     #[ManyToMany(targetEntity: Item::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[JoinTable(name: 'inventorySlot')]
     private Collection $items;
 
-    #[Groups('inventory')]
+    #[Groups('playerInventory')]
     #[Column(type: Types::INTEGER)]
     private int $space = 28;
 

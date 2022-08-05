@@ -20,11 +20,9 @@ class Currency
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[Groups('wallet')]
     #[Column(type: Types::STRING)]
     private string $label;
 
-    #[Groups('wallet')]
     #[Column(type: Types::STRING, nullable: true)]
     private string $description;
 

@@ -16,12 +16,12 @@ class InventoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Inventory::class);
     }
 
-    public function findCharacterInventory(UserCharacter $character)
+    public function findCharacterInventory(UserCharacter $character): Inventory
     {
         return $this->createQueryBuilder('i')
             ->where(' i.character = :character')
             ->setParameter('character', $character)
             ->getQuery()
-            ->getResult();
+            ->getSingleResult();
     }
 }

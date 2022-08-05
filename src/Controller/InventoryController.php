@@ -27,12 +27,12 @@ class InventoryController
     public function getUserInventory(InventoryRepository $inventoryRepository,
                                   SerializerInterface $serializer): JsonResponse
     {
-        $user = $this->getCurrentUser();
+        $character = $this->getCurrentUser()->getCharacter();
 
-        $inventory = $inventoryRepository->findCharacterInventory($user);
+        $inventory = $inventoryRepository->findCharacterInventory($character);
 
         return new JsonResponse(
-            $serializer->serialize($inventory, 'json', ['groups' => 'inventory']),
+            $serializer->serialize($inventory, 'json', ['groups' => 'playerInventory']),
             Response::HTTP_OK,
             [],
             true

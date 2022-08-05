@@ -19,8 +19,9 @@ class WalletRepository extends ServiceEntityRepository
     public function findCharacterWallet(UserCharacter $character)
     {
         return $this->createQueryBuilder('w')
-            ->select(['c.label', 'w.amount'])
-            ->join('w.currency', 'c')
+            ->select(['c.label as type', 'uc.amount'])
+            ->join('w.currencies', 'uc')
+            ->join('uc.currency', 'c')
             ->where(' w.character = :character')
             ->setParameter('character', $character)
             ->getQuery()

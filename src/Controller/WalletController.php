@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\CharacterCurrency;
 use App\Entity\User;
-use App\Entity\Wallet;
 use App\Repository\WalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -35,7 +35,7 @@ class WalletController
         $wallet = $repository->findCharacterWallet($character);
 
         return new JsonResponse(
-            $serializer->serialize($wallet, 'json', ['groups' => 'wallet']),
+            $serializer->serialize($wallet, 'json', ['groups' => 'characterWallet']),
             Response::HTTP_OK,
             [],
             true
@@ -44,7 +44,7 @@ class WalletController
 
     #[Route(name: 'put', methods: [Request::METHOD_PUT])]
     public function updateCurrency(
-        Wallet $currency,
+        CharacterCurrency $currency,
         EntityManagerInterface $entityManager,
         SerializerInterface $serializer,
         ValidatorInterface $validator): JsonResponse
@@ -61,7 +61,7 @@ class WalletController
 
         $character = $this->getCurrentUser()->getCharacter();
 
-        $character->addCurrency($currency);
+        $character->getWallet()->addCurrency($currency);
 
 //        /** @var Currency $currency */
 //        $currency = $serializer->deserialize(

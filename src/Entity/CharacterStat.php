@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CharacterRepository;
+use App\Repository\CharacterStatRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -13,7 +14,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[Entity(repositoryClass: CharacterRepository::class)]
+#[Entity(repositoryClass: CharacterStatRepository::class)]
 #[UniqueEntity(
     fields: ['character', 'stat'],
     message: 'This character stat already got a value'

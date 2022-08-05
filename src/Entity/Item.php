@@ -21,25 +21,24 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[DiscriminatorMap(['item' => Item::class, 'equipment' => Equipment::class])]
 class Item
 {
-    #[Groups('inventory')]
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
     protected ?int $id = null;
 
-    #[Groups(['inventory', 'characterEquipment'])]
+    #[Groups(['playerInventory', 'characterEquipment'])]
     #[Column(type: Types::STRING, unique: true)]
     protected string $name;
 
-    #[Groups(['inventory', 'characterEquipment'])]
+    #[Groups(['playerInventory', 'characterEquipment'])]
     #[Column(type: Types::STRING)]
     protected string $iconPath;
 
-    #[Groups('inventory')]
+    #[Groups('playerInventory')]
     #[Column(type: Types::BOOLEAN)]
     protected bool $isDefaultItem = true;
 
-    #[Groups('inventory')]
+    #[Groups('playerInventory')]
     #[Column(type: Types::INTEGER)]
     protected int $cost;
 

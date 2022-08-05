@@ -4,20 +4,20 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="1868" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/EquipmentFixtures.php" />
+          <option name="caretOffset" value="1142" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/WalletController.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="1269" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/EquipmentController.php" />
+          <option name="caretOffset" value="1456" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/UserFixtures.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="1235" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/CharacterEquipment.php" />
+          <option name="caretOffset" value="764" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Wallet.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="902" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Equipment.php" />
+          <option name="caretOffset" value="482" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Repository/WalletRepository.php" />
         </OpenedFileInfo>
       </list>
     </option>

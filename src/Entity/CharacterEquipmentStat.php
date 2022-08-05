@@ -25,11 +25,9 @@ class CharacterEquipmentStat
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: CharacterEquipment::class, inversedBy: 'modifiers')]
     private CharacterEquipment $characterEquipment;
 
-    #[Groups('characterEquipment')]
     #[ManyToOne(targetEntity: Statistic::class)]
     private Statistic $stat;
 
@@ -60,6 +58,12 @@ class CharacterEquipmentStat
     public function setStat(Statistic $stat): void
     {
         $this->stat = $stat;
+    }
+
+    #[Groups('characterEquipment')]
+    public function getStatType(): string
+    {
+        return $this->stat->getLabel();
     }
 
     public function getValue(): int
