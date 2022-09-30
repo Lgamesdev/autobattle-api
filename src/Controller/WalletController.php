@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\CharacterCurrency;
+use App\Entity\Currency;
 use App\Entity\User;
 use App\Repository\WalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/user/wallet', name: 'api_user_wallet_')]
@@ -32,10 +35,18 @@ class WalletController
     {
         $character = $this->getCurrentUser()->getCharacter();
 
-        $wallet = $repository->findCharacterWallet($character);
+        try {
+            $wallet = $repository->findCharacterWallet($character);
+        } catch (NoResultException|NonUniqueResultException $e) {
+            return new JsonResponse(
+                $serializer->serialize($e, 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],
+                true);
+        }
 
         return new JsonResponse(
-            $serializer->serialize($wallet, 'json', ['groups' => 'characterWallet']),
+            $serializer->serialize($wallet, 'json', SerializationContext::create()->setGroups(['characterWallet'])),
             Response::HTTP_OK,
             [],
             true
@@ -44,10 +55,10 @@ class WalletController
 
     #[Route(name: 'put', methods: [Request::METHOD_PUT])]
     public function updateCurrency(
-        CharacterCurrency $currency,
+        Currency               $currency,
         EntityManagerInterface $entityManager,
-        SerializerInterface $serializer,
-        ValidatorInterface $validator): JsonResponse
+        SerializerInterface    $serializer,
+        ValidatorInterface     $validator): JsonResponse
     {
         $errors = $validator->validate($currency);
 

@@ -14,13 +14,4 @@ class CurrencyRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Currency::class);
     }
-
-    public function findAllIndexed(): array
-    {
-        return $this->createQueryBuilder('c')
-            ->orderBy('c.label', 'ASC')
-            ->indexBy('c', 'c.label')
-            ->getQuery()
-            ->getResult();
-    }
 }

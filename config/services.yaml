@@ -41,3 +41,8 @@ services:
         class: App\EventListener\AuthenticationSuccessListener
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccessResponse }
+
+#    enum_handler:
+#        class: App\JMS\EnumHandler
+#        tags:
+#            - { name: jms_serializer.subscribing_handler }

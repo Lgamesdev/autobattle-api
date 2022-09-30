@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\OneToOne;
-use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: InventoryRepository::class)]
 class Inventory
@@ -28,12 +28,12 @@ class Inventory
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
-    #[Groups('playerInventory')]
-    #[ManyToMany(targetEntity: Item::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups(['playerInventory'])]
+    #[ManyToMany(targetEntity: BaseCharacterItem::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[JoinTable(name: 'inventorySlot')]
     private Collection $items;
 
-    #[Groups('playerInventory')]
+    #[Groups(['playerInventory'])]
     #[Column(type: Types::INTEGER)]
     private int $space = 28;
 
@@ -67,10 +67,11 @@ class Inventory
         return $this->items;
     }
 
-    public function addItem(Item $item): self
+    public function addCharacterItem(CharacterItem|CharacterEquipment $characterItem): self
     {
-        if (!$this->items->contains($item) && $this->items->count() < $this->space) {
-            $this->items[] = $item;
+        if ($this->items->count() < $this->space) {
+            $this->items[] = $characterItem;
+            $characterItem->setCharacter($this->character);
         }
 
         return $this;

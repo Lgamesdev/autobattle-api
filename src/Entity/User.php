@@ -11,6 +11,8 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\OneToOne;
+use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\ExclusionPolicy;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -19,11 +21,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: 'username', message: 'This username is already used.')]
 #[UniqueEntity(fields: 'email', message: 'This email is already used.')]
+#[ExclusionPolicy('all')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 	#[Id]
 	#[GeneratedValue]
 	#[Column(type: Types::INTEGER)]
+    #[Exclude]
 	private ?int $id = null;
 
 	#[Column(type: Types::STRING, unique: true)]

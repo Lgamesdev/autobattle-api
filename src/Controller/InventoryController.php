@@ -6,12 +6,13 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\InventoryRepository;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/user/inventory', name: 'api_inventory_')]
 class InventoryController
@@ -24,15 +25,12 @@ class InventoryController
     }
 
     #[Route(name: 'get', methods: [Request::METHOD_GET])]
-    public function getUserInventory(InventoryRepository $inventoryRepository,
-                                  SerializerInterface $serializer): JsonResponse
+    public function getUserInventory(SerializerInterface $serializer): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();
 
-        $inventory = $inventoryRepository->findCharacterInventory($character);
-
         return new JsonResponse(
-            $serializer->serialize($inventory, 'json', ['groups' => 'playerInventory']),
+            $serializer->serialize($character->getInventory(), 'json', SerializationContext::create()->setGroups(['playerInventory'])),
             Response::HTTP_OK,
             [],
             true

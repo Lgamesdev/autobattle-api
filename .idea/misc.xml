@@ -4,20 +4,32 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="1142" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/WalletController.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1456" />
+          <option name="caretOffset" value="2315" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/UserFixtures.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="482" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Repository/WalletRepository.php" />
+          <option name="caretOffset" value="944" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Inventory.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="764" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Wallet.php" />
+          <option name="caretOffset" value="708" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/CharacterItem.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="746" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/CharacterStat.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="747" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/CharacterEquipment.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="904" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Gear.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="572" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/BaseCharacterItem.php" />
         </OpenedFileInfo>
       </list>
     </option>

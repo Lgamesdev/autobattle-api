@@ -14,12 +14,19 @@ class CharacterEquipmentRepository extends ServiceEntityRepository
         parent::__construct($registry, CharacterEquipment::class);
     }
 
-    public function findCharacterEquipments(UserCharacter $character)
+    public function findCharacterEquipments(UserCharacter $character): array
     {
-        return $this->createQueryBuilder('ce')
-            ->where(' ce.character = :character')
-            ->setParameter('character', $character)
-            ->getQuery()
-            ->getResult();
+        /*$qb = $this->getEntityManager()->getRepository(EquipmentSlot::class)
+            ->createQueryBuilder('es')
+            ->select('ce')
+            ->leftJoin(CharacterEquipment::class, 'ce',
+                Join::WITH, 'ce.equipmentSlot = es.id AND ce.character = :character')
+            ->setParameter('character', $character);*/
+
+        $qb = $this->createQueryBuilder('character_equipment')
+            ->where('character_equipment.character = :character')
+            ->setParameter('character', $character);
+
+        return $qb->getQuery()->getResult();
     }
 }

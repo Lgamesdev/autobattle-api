@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\ItemRepository;
+use App\Trait\EntityItemTrait;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
@@ -13,32 +14,35 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\InheritanceType;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Doctrine\ORM\Mapping\MappedSuperclass;
+use JMS\Serializer\Annotation\Groups;
 
-#[Entity(repositoryClass: ItemRepository::class)]
-#[InheritanceType('JOINED')]
+/*#[InheritanceType('JOINED')]
 #[DiscriminatorColumn(name: 'type', type: Types::STRING)]
-#[DiscriminatorMap(['item' => Item::class, 'equipment' => Equipment::class])]
+#[DiscriminatorMap(['item' => Item::class, 'equipment' => Equipment::class])]*/
+#[MappedSuperclass]
+#[Entity(repositoryClass: ItemRepository::class)]
 class Item
 {
+    #[Groups(['shopList'])]
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
     protected ?int $id = null;
 
-    #[Groups(['playerInventory', 'characterEquipment'])]
+    #[Groups(['playerInventory', 'characterEquipment', 'shopList'])]
     #[Column(type: Types::STRING, unique: true)]
     protected string $name;
 
-    #[Groups(['playerInventory', 'characterEquipment'])]
+    #[Groups(['playerInventory', 'characterEquipment', 'shopList'])]
     #[Column(type: Types::STRING)]
     protected string $iconPath;
 
-    #[Groups('playerInventory')]
+    #[Groups(['playerInventory', 'shopList'])]
     #[Column(type: Types::BOOLEAN)]
     protected bool $isDefaultItem = true;
 
-    #[Groups('playerInventory')]
+    #[Groups(['playerInventory', 'shopList'])]
     #[Column(type: Types::INTEGER)]
     protected int $cost;
 

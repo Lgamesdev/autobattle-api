@@ -12,4 +12,17 @@ class CharacterRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, UserCharacter::class);
     }
+
+    public function findPlayersByCharacterRank(UserCharacter $character)
+    {
+        $characterRepository = $this->getEntityManager()->getRepository(UserCharacter::class);
+
+        return $characterRepository->createQueryBuilder('uc')
+            ->where('uc != :character')
+            ->setParameter('character', $character)
+            ->orderBy('uc.ranking', 'DESC')
+            ->setMaxResults(25)
+            ->getQuery()
+            ->getResult();
+    }
 }

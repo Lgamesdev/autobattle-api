@@ -1,9 +1,12 @@
 api_login_check:
     path: /api/login
+    methods: ['POST']
 api_refresh_token:
     path: /api/token/refresh
+    methods: ['POST']
 api_token_invalidate:
     path: /api/token/invalidate
+    methods: ['POST']
 controllers:
     resource: ../src/Controller/
     type: attribute

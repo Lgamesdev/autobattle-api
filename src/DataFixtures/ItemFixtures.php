@@ -15,7 +15,7 @@ final class ItemFixtures extends Fixture
         for($i = 1; $i <= 5; ++$i) {
             $item = new Item();
             $item->setName(sprintf('Item%d', $i));
-            $item->setIconPath(sprintf('Icon/Item/item_%d.png', $i));
+            $item->setIconPath(sprintf('Icons/Item/item_%d.png', $i));
             $item->setCost(rand(20, 40));
 
             $manager->persist($item);

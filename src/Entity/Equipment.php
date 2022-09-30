@@ -4,34 +4,35 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\EquipmentSlot;
+use App\Enum\StatType;
 use App\Repository\EquipmentRepository;
+use App\Trait\EntityEquipmentTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\GeneratedValue;
-use Doctrine\ORM\Mapping\Id;
-use Doctrine\ORM\Mapping\JoinColumn;
-use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
-use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\SerializedName;
+use JMS\Serializer\Annotation\VirtualProperty;
 
 #[Entity(repositoryClass: EquipmentRepository::class)]
 class Equipment extends Item
 {
-    #[ManyToOne(targetEntity: EquipmentSlot::class)]
-    #[JoinColumn(name: 'equipmentSlot_id', referencedColumnName: 'id')]
-    private EquipmentSlot $equipmentSlot;
+    #[Column(type: 'string', enumType: EquipmentSlot::class)]
+    protected EquipmentSlot $equipmentSlot;
 
-    #[Groups('characterEquipment')]
+    #[Groups(['characterEquipment', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
     #[OneToMany(mappedBy: 'equipment', targetEntity: EquipmentStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $stats;
+    protected Collection $stats;
 
-    #[Groups('characterEquipment')]
-    #[Column(type: Types::STRING)]
-    private string $spritePath;
+    #[Groups(['characterEquipment', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[Column(type: Types::INTEGER)]
+    protected int $spriteId;
 
+    #[Groups(['characterEquipment', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
     protected bool $isDefaultItem = false;
 
     public function __construct()
@@ -54,12 +55,14 @@ class Equipment extends Item
         return $this;
     }
 
-    public function stat(Statistic $stat, int $value) : void
+    public function stat(StatType $stat, ?int $value) : void
     {
-        $newStat = new EquipmentStat();
-        $newStat->setStat($stat);
-        $newStat->setValue($value);
-        $this->addStat($newStat);
+        if ($value != null) {
+            $newStat = new EquipmentStat();
+            $newStat->setStat($stat);
+            $newStat->setValue($value);
+            $this->addStat($newStat);
+        }
     }
 
     public function getEquipmentSlot(): EquipmentSlot
@@ -67,24 +70,26 @@ class Equipment extends Item
         return $this->equipmentSlot;
     }
 
-    public function setEquipmentSlot(EquipmentSlot $equipmentSlot): void
+    public function setEquipmentSlot(string $value): void
     {
-        $this->equipmentSlot = $equipmentSlot;
+        $this->equipmentSlot = EquipmentSlot::from($value);
     }
 
-    #[Groups('characterEquipment')]
-    public function getEquipmentType(): string
+    #[Groups(['characterEquipment', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[VirtualProperty]
+    #[SerializedName('equipmentSlot')]
+    public function getEquipmentSlotValue(): string
     {
-        return $this->equipmentSlot->getLabel();
+        return $this->equipmentSlot->value;
     }
 
-    public function getSpritePath(): string
+    public function getSpriteId(): int
     {
-        return $this->spritePath;
+        return $this->spriteId;
     }
 
-    public function setSpritePath(string $spritePath): void
+    public function setSpriteId(int $spriteId): void
     {
-        $this->spritePath = $spritePath;
+        $this->spriteId = $spriteId;
     }
 }

@@ -19,8 +19,6 @@ class CharacterStatRepository extends ServiceEntityRepository
     public function findCharacterStats(UserCharacter $character)
     {
         return $this->createQueryBuilder('cs')
-            ->select(['s.label', 'cs.value'])
-            ->join('cs.stat', 's')
             ->where(' cs.character = :character')
             ->setParameter('character', $character)
             ->getQuery()

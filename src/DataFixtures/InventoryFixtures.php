@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
+use App\Entity\CharacterEquipment;
+use App\Entity\CharacterItem;
 use App\Entity\UserCharacter;
 use App\Entity\Equipment;
 use App\Entity\Item;
@@ -29,12 +31,12 @@ final class InventoryFixtures extends Fixture implements DependentFixtureInterfa
 
             for($x = 1; $x <= rand(2, 5); ++$x) {
                 $item = $items[array_rand($items)];
-                $character->getInventory()->addItem($item);
+                $character->addToInventory(new CharacterItem($item));
             }
 
             for($x = 1; $x <= rand(2, 5); ++$x) {
                 $equipment = $equipments[array_rand($equipments)];
-                $character->getInventory()->addItem($equipment);
+                $character->addToInventory(new CharacterEquipment($equipment));
             }
 
             $manager->persist($character);

@@ -12,11 +12,15 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\InverseJoinColumn;
 use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\JoinTable;
+use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
+use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: WalletRepository::class)]
 #[UniqueEntity(
@@ -28,14 +32,18 @@ class Wallet
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
+    #[Exclude]
     private ?int $id = null;
 
     #[ManyToOne(targetEntity: UserCharacter::class, inversedBy: 'wallet')]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
-    #[Groups('characterWallet')]
-    #[OneToMany(mappedBy: 'wallet', targetEntity: CharacterCurrency::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups(['characterWallet', 'fighter'])]
+    #[ManyToMany(targetEntity: Currency::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[JoinTable(name: 'wallet_currencies')]
+    #[JoinColumn(name: 'wallet_id', referencedColumnName: 'id')]
+    #[InverseJoinColumn(name: 'currency_id', referencedColumnName: 'id', unique: true)]
     private Collection $currencies;
 
     public function __construct()
@@ -58,11 +66,15 @@ class Wallet
         $this->character = $character;
     }
 
-    public function addCurrency(CharacterCurrency $currency): self
+    public function getCurrencies(): ArrayCollection|Collection
+    {
+        return $this->currencies;
+    }
+
+    public function addCurrency(Currency $currency): self
     {
         if (!$this->currencies->contains($currency)) {
             $this->currencies[] = $currency;
-            $currency->setWallet($this);
         }
 
         return $this;

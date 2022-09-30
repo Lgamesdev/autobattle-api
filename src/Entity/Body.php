@@ -10,7 +10,8 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToOne;
-use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[Entity(repositoryClass: BodyRepository::class)]
@@ -19,29 +20,30 @@ class Body
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
+    #[Exclude]
     private ?int $id = null;
 
     #[OneToOne(inversedBy: 'body', targetEntity: UserCharacter::class)]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
-    #[Groups('body')]
+    #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::BOOLEAN)]
     private bool $isMaleGender = true;
 
-    #[Groups('body')]
+    #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::INTEGER)]
     private int $hairIndex = 0;
 
-    #[Groups('body')]
+    #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::INTEGER)]
     private int $moustacheIndex = 0;
 
-    #[Groups('body')]
+    #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::INTEGER)]
     private int $beardIndex = 0;
 
-    #[Groups('body')]
+    #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
@@ -49,7 +51,7 @@ class Body
     )]
     private string $hairColor = '#564336';
 
-    #[Groups('body')]
+    #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
@@ -57,7 +59,7 @@ class Body
     )]
     private string $skinColor = '#D8C19F';
 
-    #[Groups('body')]
+    #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
@@ -65,15 +67,7 @@ class Body
     )]
     private string $chestColor = '#dc0505';
 
-    #[Groups('body')]
-    #[Column(type: Types::STRING)]
-    #[Assert\CssColor(
-        formats: Assert\CssColor::HEX_LONG,
-        message: 'The belt color must be 6-character hexadecimal color.'
-    )]
-    private string $beltColor = '#c27101';
-
-    #[Groups('body')]
+    #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::STRING)]
     #[Assert\CssColor(
         formats: Assert\CssColor::HEX_LONG,
@@ -166,16 +160,6 @@ class Body
         $this->chestColor = $chestColor;
     }
 
-    public function getBeltColor(): string
-    {
-        return $this->beltColor;
-    }
-
-    public function setBeltColor(string $beltColor): void
-    {
-        $this->beltColor = $beltColor;
-    }
-
     public function getShortColor(): string
     {
         return $this->shortColor;
@@ -186,7 +170,7 @@ class Body
         $this->shortColor = $shortColor;
     }
 
-    public function setRandomCustomization()
+    public function setRandomCustomization(): void
     {
         $skinColorArray = [
             "#FFE9C6",
@@ -243,19 +227,4 @@ class Body
 
         $this->character->setCreationDone(true);
     }
-
-//    public function toArray(): array
-//    {
-//        return [
-//            "isMaleGender" => $this->isMaleGender(),
-//            "hairIndex" => $this->getHairIndex(),
-//            "moustacheIndex" => $this->getMoustacheIndex(),
-//            "beardIndex" => $this->getBeardIndex(),
-//            "hairColor" => $this->getHairColor(),
-//            "skinColor" => $this->getSkinColor(),
-//            "chestColor" => $this->getChestColor(),
-//            "beltColor" => $this->getBeltColor(),
-//            "shortColor" => $this->getShortColor(),
-//        ];
-//    }
 }

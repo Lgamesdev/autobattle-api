@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\CharacterEquipment;
+use App\Entity\CharacterEquipmentModifier;
 use App\Entity\Currency;
 use App\Entity\Equipment;
-use App\Entity\EquipmentSlot;
+use App\Enum\CurrencyType;
+use App\Enum\EquipmentSlot;
+use App\Entity\Statistic;
 use App\Entity\User;
+use App\Enum\StatType;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-final class UserFixtures extends Fixture implements DependentFixtureInterface
+final class UserFixtures extends Fixture /*implements DependentFixtureInterface*/
 {
     public function __construct(private readonly UserPasswordHasherInterface $userPasswordHarsher)
     {
@@ -22,12 +26,6 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        /** @var array<array-key, Currency> $currencyTypes */
-        $currencyTypes = $manager->getRepository(Currency::class)->findAll();
-
-        /** @var array<array-key, EquipmentSlot> $equipmentSlots */
-        $equipmentSlots = $manager->getRepository(EquipmentSlot::class)->findAll();
-
         for($i = 1; $i <= 5; ++$i) {
             $user = new User();
             $user->setUsername(sprintf('user+%d', $i));
@@ -36,23 +34,52 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
 
             $character = $user->getCharacter();
             $character->getBody()->setRandomCustomization();
+            $character->setRanking(rand(100, 200));
 
-            foreach ($currencyTypes as $currencyType)
+            foreach (StatType::cases() as $statType) {
+                $statValue = match ($statType) {
+                    StatType::HEALTH => rand(90, 110),
+                    StatType::ARMOR => null,
+                    StatType::SPEED, StatType::DODGE => rand(4, 8),
+                    StatType::DAMAGE => rand(8, 12),
+                    StatType::CRITICAL => rand(6, 12)
+                };
+                $character->stat($statType, $statValue);
+            }
+
+            foreach (CurrencyType::cases() as $currencyType)
             {
                 $character->currency($currencyType, rand(100, 150));
             }
 
-            foreach($equipmentSlots as $slot)
+            foreach (EquipmentSlot::cases() as $equipmentSlot)
             {
                 if(rand(0, 100) < 50)
                 {
                     /** @var array<array-key, Equipment> $equipments */
-                    $equipments = $manager->getRepository(Equipment::class)->findByEquipmentSlot($slot);
+                    $equipments = $manager->getRepository(Equipment::class)->findByEquipmentSlot($equipmentSlot);
                     $equipment = $equipments[rand(0, (count($equipments) - 1))];
+                    $characterEquipment = new CharacterEquipment($equipment);
 
-                    $characterEquipment = new CharacterEquipment();
-                    $characterEquipment->setEquipment($equipment);
-                    $character->addEquipment($characterEquipment);
+                    foreach (StatType::cases() as $statType) {
+                        $statValue = match ($statType) {
+                            StatType::HEALTH => rand(0, 5),
+                            StatType::ARMOR => ($equipmentSlot == EquipmentSlot::WEAPON->value) ? null : rand(0, 1),
+                            StatType::SPEED, StatType::DODGE => ($equipmentSlot == EquipmentSlot::WEAPON->value) ? null : rand(0, 2),
+                            StatType::DAMAGE => ($equipmentSlot == EquipmentSlot::WEAPON->value) ? rand(0, 4) : null,
+                            StatType::CRITICAL => ($equipmentSlot == EquipmentSlot::WEAPON->value) ? rand(0, 2) : null
+                        };
+
+                        if ($statValue != null) {
+                            $equipmentModifier = new CharacterEquipmentModifier();
+                            $equipmentModifier->setStat($statType);
+                            $equipmentModifier->setValue($statValue);
+
+                            $characterEquipment->addModifier($equipmentModifier);
+                        }
+                    }
+
+                    $character->equip($characterEquipment);
                 }
             }
 
@@ -62,10 +89,9 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
         $manager->flush();
     }
 
-    function getDependencies() : array
+    /*function getDependencies() : array
     {
         return [
-            CurrencyFixtures::class,
         ];
-    }
+    }*/
 }

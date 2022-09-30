@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\CharacterEquipmentStat;
+use App\Entity\CharacterEquipmentModifier;
 use App\Entity\UserCharacter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -13,7 +13,7 @@ class CharacterEquipmentStatRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, CharacterEquipmentStat::class);
+        parent::__construct($registry, CharacterEquipmentModifier::class);
     }
 
     public function findCharacterEquipmentStats(UserCharacter $character)

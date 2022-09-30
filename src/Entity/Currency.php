@@ -1,53 +1,72 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Entity;
 
+use App\Enum\CurrencyType;
 use App\Repository\CurrencyRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\SerializedName;
+use JMS\Serializer\Annotation\VirtualProperty;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[Entity(repositoryClass: CurrencyRepository::class)]
+#[UniqueEntity(
+    fields: ['character', 'stat'],
+    message: 'This character stat already got a value'
+)]
 class Currency
 {
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
+    #[Exclude]
     private ?int $id = null;
 
-    #[Column(type: Types::STRING)]
-    private string $label;
+    #[Column(type: 'string', enumType: CurrencyType::class)]
+    private CurrencyType $currency;
 
-    #[Column(type: Types::STRING, nullable: true)]
-    private string $description;
+    #[Groups(['characterWallet', 'fight', 'fighter'])]
+    #[Column(type: Types::INTEGER)]
+    private int $amount;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getLabel(): string
+    public function getCurrency(): CurrencyType
     {
-        return $this->label;
+        return $this->currency;
     }
 
-    public function setLabel(string $label): void
+    public function setCurrency(CurrencyType $currency): void
     {
-        $this->label = $label;
+        $this->currency = $currency;
     }
 
-    public function getDescription(): string
+    #[Groups(['characterWallet', 'fight', 'fighter'])]
+    #[VirtualProperty]
+    #[SerializedName('currencyType')]
+    public function getCurrencyType(): string
     {
-        return $this->description;
+        return $this->currency->value;
     }
 
-    public function setDescription(string $description): void
+    public function getAmount(): int
     {
-        $this->description = $description;
+        return $this->amount;
+    }
+
+    public function setAmount(int $amount): void
+    {
+        $this->amount = $amount;
     }
 }

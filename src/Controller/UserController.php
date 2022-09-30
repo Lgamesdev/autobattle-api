@@ -4,13 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Body;
 use App\Entity\User;
+use App\Repository\FightRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/user', name: 'api_user_')]
@@ -29,7 +31,7 @@ class UserController
         $character = $this->getCurrentUser()->getCharacter();
 
         return new JsonResponse(
-            $serializer->serialize($character->getBody(), 'json', ['groups' => ['body']]),
+            $serializer->serialize($character->getBody(), 'json', SerializationContext::create()->setGroups(['body'])),
             Response::HTTP_OK,
             [],
             true
@@ -72,15 +74,33 @@ class UserController
         $entityManager->flush();
 
         return new JsonResponse(
-            $serializer->serialize($character->getBody(), 'json', ['groups' => ['body']]),
+            $serializer->serialize($character->getBody(), 'json', SerializationContext::create()->setGroups(['body'])),
             Response::HTTP_CREATED,
             [],
             true
         );
     }
 
-    #[Route('/infos', name: 'get_infos', methods: [Request::METHOD_GET])]
-    public function getUserInfos(SerializerInterface $serializer): JsonResponse
+    #[Route('/progression', name: 'get_progression', methods: [Request::METHOD_GET])]
+    public function getUserProgression(SerializerInterface $serializer): JsonResponse
+    {
+        $character = $this->getCurrentUser()->getCharacter();
+
+        return new JsonResponse(
+            $serializer->serialize(
+            [
+                "level" => $character->getLevel(),
+                "xp" => $character->getExperience(),
+                "ranking" => $character->getRanking(),
+            ], 'json'),
+            Response::HTTP_OK,
+            [],
+            true
+        );
+    }
+
+    #[Route('/configuration', name: 'get_configuration', methods: [Request::METHOD_GET])]
+    public function getUserConfiguration(SerializerInterface $serializer): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();
 

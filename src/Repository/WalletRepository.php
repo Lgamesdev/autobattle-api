@@ -7,6 +7,8 @@ namespace App\Repository;
 use App\Entity\UserCharacter;
 use App\Entity\Wallet;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 class WalletRepository extends ServiceEntityRepository
@@ -16,15 +18,18 @@ class WalletRepository extends ServiceEntityRepository
         parent::__construct($registry, Wallet::class);
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function findCharacterWallet(UserCharacter $character)
     {
         return $this->createQueryBuilder('w')
-            ->select(['c.label as type', 'uc.amount'])
-            ->join('w.currencies', 'uc')
-            ->join('uc.currency', 'c')
+/*            ->select(['uc.currency', 'uc.amount'])
+            ->join('w.currencies', 'uc')*/
             ->where(' w.character = :character')
             ->setParameter('character', $character)
             ->getQuery()
-            ->getResult();
+            ->getSingleResult();
     }
 }
