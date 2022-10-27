@@ -35,6 +35,7 @@ class CharacterStat
     private UserCharacter $character;
 
     #[Column(type: 'string', enumType: StatType::class)]
+    #[Exclude]
     private StatType $stat;
 
     #[Groups(['characterStat', 'fighter', 'opponent_fighter'])]

@@ -17,27 +17,27 @@ use Doctrine\ORM\Mapping\OneToMany;
 use JMS\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: CharacterEquipmentRepository::class)]
-/*#[UniqueEntity(
+#[UniqueEntity(
     fields: ['character', 'equipment', 'equipmentSlot'],
     message: 'This equipmentSlot is already used.'
-)]*/
+)]
 class CharacterEquipment extends BaseCharacterItem
 {
-    #[Groups(['characterEquipment', 'playerInventory', 'fighter', 'opponent_fighter'])]
+    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter'])]
     #[ManyToOne(targetEntity: Equipment::class)]
     #[JoinColumn(name: 'equipment_id', referencedColumnName: 'id')]
-    protected Equipment $equipment;
+    protected Equipment $item;
 
-    #[Groups(['characterEquipment', 'playerInventory', 'fighter', 'opponent_fighter'])]
+    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter'])]
     #[OneToMany(mappedBy: 'characterEquipment', targetEntity: CharacterEquipmentModifier::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $modifiers;
 
-    public function __construct(Equipment $equipment = null)
+    public function __construct(Equipment $item = null)
     {
         $this->modifiers = new ArrayCollection();
 
-        if($equipment != null) {
-            $this->equipment = $equipment;
+        if($item != null) {
+            $this->item = $item;
         }
     }
 
@@ -46,14 +46,14 @@ class CharacterEquipment extends BaseCharacterItem
         return $this->item->getEquipmentSlot();
     }
 
-    public function getEquipment(): Equipment
+    public function getItem(): Equipment
     {
-        return $this->equipment;
+        return $this->item;
     }
 
-    public function setEquipment(Equipment $equipment): void
+    public function setItem(Equipment $item): void
     {
-        $this->equipment = $equipment;
+        $this->item = $item;
     }
 
     public function getModifiers(): Collection

@@ -64,7 +64,7 @@ class UserController
                 null,
                 Response::HTTP_FORBIDDEN,
                 [],
-                true);
+                false);
         }
 
         $character->setBody($body);

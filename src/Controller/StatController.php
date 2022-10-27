@@ -26,15 +26,12 @@ class StatController
     }
 
     #[Route(name: 'get', methods: [Request::METHOD_GET])]
-    public function getCharacterStats(CharacterStatRepository $repository,
-                                  SerializerInterface $serializer): JsonResponse
+    public function getCharacterStats(SerializerInterface $serializer): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();
 
-        $stats = $repository->findCharacterStats($character);
-
         return new JsonResponse(
-            $serializer->serialize($stats, 'json', SerializationContext::create()->setGroups(['characterStat'])),
+            $serializer->serialize($character->getStats(), 'json', SerializationContext::create()->setGroups(['characterStat'])),
             Response::HTTP_OK,
             [],
             true

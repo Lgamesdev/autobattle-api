@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Enum\CurrencyType;
-use App\Enum\EquipmentSlot;
 use App\Enum\StatType;
 use App\Repository\CharacterRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -24,7 +23,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[Entity(repositoryClass: CharacterRepository::class)]
-#[UniqueEntity(fields: 'name', message: 'This character\'s name is already used.')]
+/*#[UniqueEntity(fields: 'name', message: 'This character\'s name is already used.')]*/
 class UserCharacter
 {
     #[Id]
@@ -39,7 +38,7 @@ class UserCharacter
 
     #[Groups(['fighter', 'opponent_fighter'])]
     #[Column(type: Types::INTEGER)]
-    #[Assert\Range(notInRangeMessage: "minimum character\'s level must be 1", min: 1)]
+    #[Assert\Range(notInRangeMessage: "minimum character\'s level must be 1 at minimum", min: 1)]
     private int $level = 1;
 
     #[Groups(['fighter'])]
@@ -143,7 +142,7 @@ class UserCharacter
     {
         $this->experience += $experience;
 
-        while(!$this->isMaxLevel() && $experience >= $this->CalculateRequiredExperienceForLevel())
+        while(!$this->isMaxLevel() && $this->experience >= $this->CalculateRequiredExperienceForLevel())
         {
             $this->experience -= $this->CalculateRequiredExperienceForLevel();
             $this->level++;
@@ -172,7 +171,14 @@ class UserCharacter
 
     public function setBody(Body $body): void
     {
-        $this->body = $body;
+        $this->body->setBeardIndex($body->getBeardIndex());
+        $this->body->setChestColor($body->getChestColor());
+        $this->body->setHairColor($body->getHairColor());
+        $this->body->setHairIndex($body->getHairIndex());
+        $this->body->setIsMaleGender($body->isMaleGender());
+        $this->body->setMoustacheIndex($body->getMoustacheIndex());
+        $this->body->setShortColor($body->getShortColor());
+        $this->body->setSkinColor($body->getSkinColor());
     }
 
     public function getWallet(): Wallet
@@ -187,6 +193,24 @@ class UserCharacter
         $curr->setAmount($amount);
 
         $this->wallet->addCurrency($curr);
+    }
+
+    public function tryBuy(BaseItem $item): CharacterItem|CharacterEquipment|null
+    {
+        if($item instanceof Item || $item instanceof Equipment) {
+            return $this->wallet->tryBuy($item);
+        } else {
+            return null;
+        }
+    }
+
+    public function sell(BaseCharacterItem $item): bool
+    {
+        if($item instanceof CharacterItem || $item instanceof CharacterEquipment) {
+            return $this->wallet->sell($item);
+        } else {
+            return false;
+        }
     }
 
     public function getStats(): ArrayCollection|Collection
@@ -221,7 +245,12 @@ class UserCharacter
 
     public function equip(CharacterEquipment $characterEquipment): void
     {
-        $this->gear->addCharacterEquipment($characterEquipment);
+        $this->gear->equip($characterEquipment);
+    }
+
+    public function unEquip(CharacterEquipment $characterEquipment): void
+    {
+        $this->gear->unEquip($characterEquipment);
     }
 
     public function getInventory(): Inventory
@@ -229,7 +258,7 @@ class UserCharacter
         return $this->inventory;
     }
 
-    public function addToInventory(CharacterItem $item): void
+    public function addToInventory(CharacterItem|CharacterEquipment $item): void
     {
         $this->inventory->addCharacterItem($item);
     }
@@ -275,6 +304,9 @@ class UserCharacter
         return $solveForRequiredXp / 4;
     }
 
+    #[Groups(['fighter', 'opponent_fighter'])]
+    #[VirtualProperty]
+    #[SerializedName('fullStats')]
     public function getFullStats(): ArrayCollection
     {
         $fullStats = new ArrayCollection();

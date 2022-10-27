@@ -24,12 +24,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 )]
 class Currency
 {
+    #[Exclude]
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
-    #[Exclude]
     private ?int $id = null;
 
+    #[Exclude]
     #[Column(type: 'string', enumType: CurrencyType::class)]
     private CurrencyType $currency;
 

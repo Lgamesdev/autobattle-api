@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\CurrencyType;
 use App\Repository\WalletRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -73,10 +74,47 @@ class Wallet
 
     public function addCurrency(Currency $currency): self
     {
-        if (!$this->currencies->contains($currency)) {
-            $this->currencies[] = $currency;
-        }
+        $currencyMatched = $this->currencies->filter(function($element) {
+            return $element->getCurrency() === CurrencyType::GOLD;
+        });
+        $characterGold = $currencyMatched->first()->getAmount();
+        $this->currencies[$currencyMatched->key()]->setAmount($characterGold + $currency->getAmount());
 
         return $this;
+    }
+
+    public function tryBuy(Item|Equipment $item): CharacterItem|CharacterEquipment|null
+    {
+        $currencyMatched = $this->currencies->filter(function($element) {
+            return $element->getCurrency() === CurrencyType::GOLD;
+        });
+
+        $characterGold = $currencyMatched->first()->getAmount();
+
+        if ($characterGold > $item->getCost()) {
+            $this->currencies[$currencyMatched->key()]->setAmount($characterGold - $item->getCost());
+            if($item instanceof Equipment) {
+                $characterEquipment = new CharacterEquipment($item);
+                $this->character->addToInventory($characterEquipment);
+                return $characterEquipment;
+            } else {
+                $characterItem = new CharacterItem($item);
+                $this->character->addToInventory($characterItem);
+                return $characterItem;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public function sell(CharacterEquipment|CharacterItem $characterItem): bool
+    {
+        $currencyMatched = $this->currencies->filter(function($element) {
+            return $element->getCurrency() === CurrencyType::GOLD;
+        });
+
+        $characterGold = $currencyMatched->first()->getAmount();
+        $this->currencies[$currencyMatched->key()]->setAmount($characterGold + $characterItem->getItem()->getCost());
+        return $this->character->getInventory()->getItems()->removeElement($characterItem);
     }
 }

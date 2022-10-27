@@ -33,9 +33,10 @@ class EquipmentStat
     private Equipment $equipment;
 
     #[Column(type: 'string', enumType: StatType::class)]
+    #[Exclude]
     private StatType $stat;
 
-    #[Groups(['characterEquipment', 'playerInventory', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
     #[Column(type: Types::INTEGER)]
     private int $value;
 
@@ -64,7 +65,7 @@ class EquipmentStat
         $this->stat = $stat;
     }
 
-    #[Groups(['characterEquipment', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
     #[VirtualProperty]
     #[SerializedName('statType')]
     public function getStatType(): string

@@ -160,6 +160,7 @@ class Reward
         //
         $character->addExperience($this->experience);
         $character->addRanking(Round($this->ranking));
+        $character->getWallet()->addCurrency($currency);
     }
 
 }

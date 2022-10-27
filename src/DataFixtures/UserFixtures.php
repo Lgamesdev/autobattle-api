@@ -18,7 +18,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-final class UserFixtures extends Fixture /*implements DependentFixtureInterface*/
+final class UserFixtures extends Fixture implements DependentFixtureInterface
 {
     public function __construct(private readonly UserPasswordHasherInterface $userPasswordHarsher)
     {
@@ -26,7 +26,7 @@ final class UserFixtures extends Fixture /*implements DependentFixtureInterface*
 
     public function load(ObjectManager $manager): void
     {
-        for($i = 1; $i <= 5; ++$i) {
+        for($i = 1; $i <= 25; ++$i) {
             $user = new User();
             $user->setUsername(sprintf('user+%d', $i));
             $user->setEmail(sprintf('user+%d@email.com', $i));
@@ -56,7 +56,7 @@ final class UserFixtures extends Fixture /*implements DependentFixtureInterface*
             {
                 if(rand(0, 100) < 50)
                 {
-                    /** @var array<array-key, Equipment> $equipments */
+                    /* @var array<array-key, Equipment> $equipments */
                     $equipments = $manager->getRepository(Equipment::class)->findByEquipmentSlot($equipmentSlot);
                     $equipment = $equipments[rand(0, (count($equipments) - 1))];
                     $characterEquipment = new CharacterEquipment($equipment);
@@ -64,10 +64,10 @@ final class UserFixtures extends Fixture /*implements DependentFixtureInterface*
                     foreach (StatType::cases() as $statType) {
                         $statValue = match ($statType) {
                             StatType::HEALTH => rand(0, 5),
-                            StatType::ARMOR => ($equipmentSlot == EquipmentSlot::WEAPON->value) ? null : rand(0, 1),
-                            StatType::SPEED, StatType::DODGE => ($equipmentSlot == EquipmentSlot::WEAPON->value) ? null : rand(0, 2),
-                            StatType::DAMAGE => ($equipmentSlot == EquipmentSlot::WEAPON->value) ? rand(0, 4) : null,
-                            StatType::CRITICAL => ($equipmentSlot == EquipmentSlot::WEAPON->value) ? rand(0, 2) : null
+                            StatType::ARMOR => ($equipmentSlot == EquipmentSlot::WEAPON) ? null : rand(0, 1),
+                            StatType::SPEED, StatType::DODGE => ($equipmentSlot == EquipmentSlot::WEAPON) ? null : rand(0, 2),
+                            StatType::DAMAGE => ($equipmentSlot == EquipmentSlot::WEAPON) ? rand(0, 4) : null,
+                            StatType::CRITICAL => ($equipmentSlot == EquipmentSlot::WEAPON) ? rand(0, 2) : null
                         };
 
                         if ($statValue != null) {
@@ -89,9 +89,11 @@ final class UserFixtures extends Fixture /*implements DependentFixtureInterface*
         $manager->flush();
     }
 
-    /*function getDependencies() : array
+    function getDependencies() : array
     {
         return [
+            ItemFixtures::class,
+            EquipmentFixtures::class
         ];
-    }*/
+    }
 }

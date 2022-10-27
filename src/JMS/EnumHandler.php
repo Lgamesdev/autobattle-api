@@ -10,9 +10,9 @@ use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\JsonDeserializationVisitor;
 use JMS\Serializer\JsonSerializationVisitor;
 
-class EnumHandler implements SubscribingHandlerInterface
+class EnumHandler //implements SubscribingHandlerInterface
 {
-    public static function getSubscribingMethods(): array
+    /*public static function getSubscribingMethods(): array
     {
         return [
             [
@@ -33,7 +33,7 @@ class EnumHandler implements SubscribingHandlerInterface
     public function serializeEnumToJson(JsonSerializationVisitor $visitor, BackedEnum $data, array $type, Context $context): string|int
     {
         return $data->value;
-    }
+    }*/
 
     /**
      * @template T
@@ -42,14 +42,14 @@ class EnumHandler implements SubscribingHandlerInterface
      *
      * @return BackedEnum|T
      */
-    public function deserializeEnumFromJson(JsonDeserializationVisitor $visitor, mixed $data, array $type, Context $context)
+    /*public function deserializeEnumFromJson(JsonDeserializationVisitor $visitor, mixed $data, array $type, Context $context)
     {
-        /** @var ?class-string<T> $type */
+        //* @var ?class-string<T> $type //
         $type = $type['params'][0]['name'] ?? null;
         if (null === $type || !is_a($type, BackedEnum::class, true)) {
             throw new LogicException();
         }
 
         return $type::from($data);
-    }
+    }*/
 }

@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Currency;
 use App\Entity\User;
+use App\Enum\CurrencyType;
+use App\Enum\StatType;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
-use JMS\Serializer\SerializerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,11 +14,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(name: 'api_auth_')]
 final class AuthController extends AbstractController
 {
+    /*
+     * Using Symfony Serializer interface cause JMS serializer don't call constructor
+     */
     #[Route('/register', name: 'register', methods: Request::METHOD_POST)]
     public function register(Request $request,
                             SerializerInterface $serializer,
@@ -43,11 +47,21 @@ final class AuthController extends AbstractController
 
         $user->setPassword($userPasswordHasher->hashPassword($user, $user->getPassword()));
 
-        /** @var array<array-key, Currency> $currencyTypes */
-        $currencyTypes = $entityManager->getRepository(Currency::class)->findAllIndexed();
+        foreach (StatType::cases() as $statType) {
+            $statValue = match ($statType) {
+                StatType::HEALTH => rand(90, 110),
+                StatType::ARMOR => null,
+                StatType::SPEED, StatType::DODGE => rand(4, 8),
+                StatType::DAMAGE => rand(8, 12),
+                StatType::CRITICAL => rand(6, 12)
+            };
+            $user->getCharacter()->stat($statType, $statValue);
+        }
 
-        $user->getCharacter()->currency($currencyTypes['Gold'], rand(125, 175));
-        $user->getCharacter()->currency($currencyTypes['Crystal'], rand(35, 65));
+        foreach (CurrencyType::cases() as $currencyType)
+        {
+            $user->getCharacter()->currency($currencyType, rand(100, 150));
+        }
 
         $entityManager->persist($user);
 
@@ -59,7 +73,7 @@ final class AuthController extends AbstractController
 
         return new JsonResponse(
             $serializer->serialize([
-                'user' => $user->getUsername(),
+                'username' => $user->getUsername(),
                 'token' => $jwtToken,
                 'refresh_token' => $refreshToken->getRefreshToken(),
                 'refresh_token_expiration' => $refreshToken->getValid(),

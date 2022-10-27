@@ -22,7 +22,7 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
                 $equipment = new Equipment();
                 $equipment->setEquipmentSlot($equipmentsSlot->value);
                 $equipment->setName($equipmentsSlot->value . $i);
-                $equipment->setIconPath(sprintf('Icons/Equipment/%1$s/%1$s_%2$d.png', $equipmentsSlot->value, $i));
+                $equipment->setIconPath(sprintf('Icons/Equipment/%1$s/%1$s_%2$d', $equipmentsSlot->value, $i));
                 $equipment->setCost(rand(50, 100));
                 $equipment->setSpriteId($i);
                 $equipment->setIsDefaultItem(false);

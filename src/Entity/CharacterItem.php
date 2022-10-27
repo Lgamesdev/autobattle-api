@@ -14,9 +14,6 @@ use JMS\Serializer\Annotation\SerializedName;
 use JMS\Serializer\Annotation\VirtualProperty;
 
 #[Entity(repositoryClass: CharacterItemRepository::class)]
-/*#[InheritanceType('SINGLE_TABLE')]
-#[DiscriminatorColumn(name: 'type', type: Types::STRING)]
-#[DiscriminatorMap(['character_item' => CharacterItem::class, 'character_equipment' => CharacterEquipment::class])]*/
 class CharacterItem extends BaseCharacterItem
 {
     #[Groups(['playerInventory'])]
@@ -43,12 +40,12 @@ class CharacterItem extends BaseCharacterItem
         $this->item = $item;
     }
 
-    #[Groups(['playerInventory'])]
+    /*#[Groups(['playerInventory'])]
     #[VirtualProperty]
     #[SerializedName('$type')]
     public function getItemType(): string
     {
         $path = explode('\\', get_called_class());
         return array_pop($path);
-    }
+    }*/
 }

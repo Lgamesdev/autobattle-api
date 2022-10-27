@@ -17,7 +17,6 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
-use JMS\Serializer\Annotation\MaxDepth;
 
 #[Entity(repositoryClass: FightRepository::class)]
 class Fight
@@ -35,13 +34,11 @@ class Fight
     #[Groups(['fight'])]
     #[ManyToOne(targetEntity: UserCharacter::class, inversedBy: 'fights')]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
-    #[MaxDepth(2)]
     private UserCharacter $character;
 
     #[Groups(['fight'])]
     #[ManyToOne(targetEntity: UserCharacter::class)]
     #[JoinColumn(name: 'opponent_id', referencedColumnName: 'id')]
-    #[MaxDepth(2)]
     private UserCharacter $opponent;
 
     #[Groups(['fight'])]
@@ -126,6 +123,9 @@ class Fight
 
         $playerTurn = true;
 
+        //dump("character max health : " . $characterHealth);
+        //dump("opponent max health : " . $opponentHealth);
+
         while($characterHealth > 0 && $opponentHealth > 0)
         {
             $action = new Action();
@@ -158,21 +158,25 @@ class Fight
                     $opponentArmor = $opponentStats->get(StatType::ARMOR->value);
                     $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
                     $opponentHealth -= $damage;
+                    //dump("opponent takes " . $damage . " current life : " . $opponentHealth);
                 } else {
                     $characterArmor = $characterStats->get(StatType::ARMOR->value);
                     $damage -= ($damage - $characterArmor) > 0 ? $characterArmor : $damage;
                     $characterHealth -= $damage;
+                    //dump("player takes " . $damage . " current life : " . $characterHealth);
                 }
             }
 
-            if ($opponentHealth < 0) $opponentHealth = 0;
-            if ($characterHealth < 0) $characterHealth = 0;
-
-            /*dump("opponent life : " . $opponentHealth);
-            dump("character life : " . $characterHealth);*/
-
             $action->setDamage($damage);
             $this->addAction($action);
+
+            if ($characterHealth <= 0) {
+                break;
+            }
+
+            if ($opponentHealth <= 0) {
+                break;
+            }
         }
 
         $this->playerWin = ($characterHealth > 0);

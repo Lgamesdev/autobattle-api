@@ -5,12 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Entity\UserCharacter;
-use App\Repository\CharacterEquipmentRepository;
-use App\Repository\CharacterRepository;
-use App\Repository\EquipmentRepository;
 use App\Repository\FightRepository;
-use App\Repository\ItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -54,7 +49,6 @@ class FightController
 
         $context = SerializationContext::create()->setGroups(array(
             'fight', // Serialize actions
-
             'character' => [
                 'fighter',
                 'body' => ['fighter'],
@@ -63,28 +57,34 @@ class FightController
                     'currencies' => ['fighter']
                 ],
                 'stats' => ['fighter'],
-                'equipments' => [
+                'gear' => [
                     'fighter',
-                    'equipment' => [
+                    'equipments' => [
                         'fighter',
-                        'stats' => ['fighter']
-                    ],
-                    'modifiers' => ['fighter']
-                ],
+                        'item' => [
+                            'fighter',
+                            'stats' => ['fighter']
+                        ],
+                        'modifiers' => ['fighter']
+                    ]
+                ]
             ],
 
             'opponent' => [
                 'opponent_fighter',
-                'body' => ['fighter'],
-                'stats' => ['fighter'],
-                'equipments' => [
-                    'fighter',
-                    'equipment' => [
-                        'fighter',
-                        'stats' => ['fighter']
-                    ],
-                    'modifiers' => ['fighter']
-                ],
+                'body' => ['opponent_fighter'],
+                'stats' => ['opponent_fighter'],
+                'gear' => [
+                    'opponent_fighter',
+                    'equipments' => [
+                        'opponent_fighter',
+                        'item' => [
+                            'opponent_fighter',
+                            'stats' => ['opponent_fighter']
+                        ],
+                        'modifiers' => ['opponent_fighter']
+                    ]
+                ]
             ]
         ));
 

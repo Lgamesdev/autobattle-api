@@ -6,17 +6,27 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use Doctrine\ORM\Mapping\DiscriminatorMap;
+use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\InheritanceType;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use JMS\Serializer\Annotation\Groups;
 
-#[MappedSuperclass]
+#[Entity()]
+#[InheritanceType('JOINED')]
+#[DiscriminatorColumn(name: 'type', type: Types::STRING)]
+#[DiscriminatorMap([
+    'character_item' => CharacterItem::class,
+    'character_equipment' => CharacterEquipment::class
+])]
 abstract class BaseCharacterItem
 {
-    #[Groups(['playerInventory', 'characterEquipment'])]
+    #[Groups(['playerInventory', 'gear'])]
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
@@ -43,5 +53,15 @@ abstract class BaseCharacterItem
     public function setCharacter(UserCharacter $character): void
     {
         $this->character = $character;
+    }
+
+    public function getAmount(): int
+    {
+        return $this->amount;
+    }
+
+    public function setAmount(int $amount): void
+    {
+        $this->amount = $amount;
     }
 }

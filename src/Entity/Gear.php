@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\EquipmentSlot;
 use App\Repository\WalletRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -20,6 +21,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\MaxDepth;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[Entity(repositoryClass: GearRepository::class)]
@@ -39,7 +41,7 @@ class Gear
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
-    #[Groups(['characterEquipment', 'fighter', 'opponent_fighter'])]
+    #[Groups(['gear', 'fighter', 'opponent_fighter'])]
     #[ManyToMany(targetEntity: CharacterEquipment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[JoinTable(name: 'gear_character_equipments')]
     #[JoinColumn(name: 'gear_id', referencedColumnName: 'id')]
@@ -71,15 +73,17 @@ class Gear
         return $this->equipments;
     }
 
-    public function addCharacterEquipment(CharacterEquipment $characterEquipment): self
+    public function equip(CharacterEquipment $characterEquipment): void
     {
         $matchedEquipments = $this->equipments->filter(function($element) use ($characterEquipment) {
             return $element->getEquipmentSlot() === $characterEquipment->getEquipmentSlot();
         });
 
+        $this->character->getInventory()->getItems()->removeElement($characterEquipment);
+
         if($matchedEquipments->count() > 0) {
             $oldEquipment = $matchedEquipments->first();
-            $this->character->getInventory()->addCharacterItem($oldEquipment);
+            $this->character->addToInventory($oldEquipment);
 
             $this->equipments[$matchedEquipments->key()] = $characterEquipment;
         } else {
@@ -87,7 +91,11 @@ class Gear
         }
 
         $characterEquipment->setCharacter($this->character);
+    }
 
-        return $this;
+    public function unEquip(CharacterEquipment $characterEquipment): void
+    {
+        $this->equipments->removeElement($characterEquipment);
+        $this->character->addToInventory($characterEquipment);
     }
 }

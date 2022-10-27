@@ -21,7 +21,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: 'username', message: 'This username is already used.')]
 #[UniqueEntity(fields: 'email', message: 'This email is already used.')]
-#[ExclusionPolicy('all')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 	#[Id]
@@ -32,7 +31,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 	#[Column(type: Types::STRING, unique: true)]
     #[Assert\NotBlank]
-    #[Assert\Length(min: 4, max: 25)]
+    #[Assert\Length(min: 2, max: 25)]
     private string $username;
 
 	#[Column(type: Types::STRING, length: 180, unique: true)]

@@ -21,8 +21,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-#[Route('/user/equipments', name: 'api_user_equipments_')]
-class EquipmentController
+#[Route('/user/gear', name: 'api_user_gear_')]
+class GearController
 {
     private TokenStorageInterface $tokenStorage;
 
@@ -31,31 +31,48 @@ class EquipmentController
         $this->tokenStorage = $storage;
     }
 
-    #[Route(name: 'get', methods: [Request::METHOD_GET])]
+    #[Route(name: 'get_user_gear', methods: [Request::METHOD_GET])]
     public function getUserEquipments(CharacterEquipmentRepository $repository,
                                       SerializerInterface $serializer): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();
 
-        $equipments = $character->getGear()->getCharacterEquipments();
+        $equipments = $character->getGear();
 
         return new JsonResponse(
-            $serializer->serialize($equipments, 'json', SerializationContext::create()->setGroups(['characterEquipment'])),
+            $serializer->serialize($equipments, 'json', SerializationContext::create()->setGroups(['gear'])),
             Response::HTTP_OK,
             [],
             true
         );
     }
 
-    #[Route('/equip/{id}', name: 'put', methods: [Request::METHOD_PUT])]
+    #[Route('/equip/{id}', name: 'equip_character_equipment', methods: [Request::METHOD_PUT])]
     public function equipCharacterEquipment(CharacterEquipment     $characterEquipment,
                                             EntityManagerInterface $entityManager): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();
 
-        dd($characterEquipment);
+        $character->equip($characterEquipment);
 
-        $character->addCharacterEquipment($characterEquipment);
+        $entityManager->persist($character);
+        $entityManager->flush();
+
+        return new JsonResponse(
+            null,
+            Response::HTTP_NO_CONTENT,
+            [],
+            false
+        );
+    }
+
+    #[Route('/unEquip/{id}', name: 'unEquip_character_equipment', methods: [Request::METHOD_PUT])]
+    public function unEquipCharacterEquipment(CharacterEquipment     $characterEquipment,
+                                            EntityManagerInterface $entityManager): JsonResponse
+    {
+        $character = $this->getCurrentUser()->getCharacter();
+
+        $character->unEquip($characterEquipment);
 
         $entityManager->persist($character);
         $entityManager->flush();
