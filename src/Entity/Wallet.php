@@ -74,11 +74,16 @@ class Wallet
 
     public function addCurrency(Currency $currency): self
     {
-        $currencyMatched = $this->currencies->filter(function($element) {
-            return $element->getCurrency() === CurrencyType::GOLD;
+        $currencyMatched = $this->currencies->filter(function($element) use ($currency) {
+            return $element->getCurrency() === $currency->getCurrency();
         });
-        $characterGold = $currencyMatched->first()->getAmount();
-        $this->currencies[$currencyMatched->key()]->setAmount($characterGold + $currency->getAmount());
+
+        if($currencyMatched->count() > 0) {
+            $characterGold = $currencyMatched->first()->getAmount();
+            $this->currencies[$currencyMatched->key()]->setAmount($characterGold + $currency->getAmount());
+        } else {
+            $this->currencies[] = $currency;
+        }
 
         return $this;
     }
