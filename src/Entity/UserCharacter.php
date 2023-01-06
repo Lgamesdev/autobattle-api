@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
+use Exception;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
 use JMS\Serializer\Annotation\SerializedName;
@@ -243,6 +244,9 @@ class UserCharacter
         return $this->gear;
     }
 
+    /**
+     * @throws Exception
+     */
     public function equip(CharacterEquipment $characterEquipment): void
     {
         $this->gear->equip($characterEquipment);

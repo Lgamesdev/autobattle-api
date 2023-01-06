@@ -18,6 +18,7 @@ use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
 use JMS\Serializer\Annotation\SerializedName;
 use JMS\Serializer\Annotation\VirtualProperty;
+use Symfony\Component\Validator\Constraints\Range;
 
 #[Entity(repositoryClass: EquipmentRepository::class)]
 class Equipment extends BaseItem
@@ -36,6 +37,11 @@ class Equipment extends BaseItem
 
     #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
     protected bool $isDefaultItem = false;
+
+    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[Column(type: Types::INTEGER)]
+    #[Range(min: 1, max: 100)]
+    protected int $requiredLevel;
 
     #[Groups(['gear', 'playerInventory', 'shopList'])]
     #[Column(type: Types::INTEGER)]
@@ -97,6 +103,16 @@ class Equipment extends BaseItem
     public function setSpriteId(int $spriteId): void
     {
         $this->spriteId = $spriteId;
+    }
+
+    public function getRequiredLevel(): int
+    {
+        return $this->requiredLevel;
+    }
+
+    public function setRequiredLevel(int $level): void
+    {
+        $this->requiredLevel = $level;
     }
 
     public function getCost(): int

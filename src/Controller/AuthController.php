@@ -49,18 +49,19 @@ final class AuthController extends AbstractController
 
         foreach (StatType::cases() as $statType) {
             $statValue = match ($statType) {
-                StatType::HEALTH => rand(90, 110),
+                StatType::HEALTH => 100,
                 StatType::ARMOR => null,
-                StatType::SPEED, StatType::DODGE => rand(4, 8),
-                StatType::DAMAGE => rand(8, 12),
-                StatType::CRITICAL => rand(6, 12)
+                StatType::DODGE => 2,
+                StatType::SPEED, 4,
+                StatType::DAMAGE => 10,
+                StatType::CRITICAL => 5
             };
             $user->getCharacter()->stat($statType, $statValue);
         }
 
         foreach (CurrencyType::cases() as $currencyType)
         {
-            $user->getCharacter()->currency($currencyType, rand(100, 150));
+            $user->getCharacter()->currency($currencyType, 200);
         }
 
         $entityManager->persist($user);

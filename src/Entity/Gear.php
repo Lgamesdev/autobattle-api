@@ -19,6 +19,7 @@ use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
+use Exception;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
 use JMS\Serializer\Annotation\MaxDepth;
@@ -73,8 +74,16 @@ class Gear
         return $this->equipments;
     }
 
+    /**
+     * @throws Exception
+     */
     public function equip(CharacterEquipment $characterEquipment): void
     {
+        if($characterEquipment->getItem()->getRequiredLevel() > $this->character->getLevel())
+        {
+            throw new Exception("Character level is too low");
+        }
+
         $matchedEquipments = $this->equipments->filter(function($element) use ($characterEquipment) {
             return $element->getEquipmentSlot() === $characterEquipment->getEquipmentSlot();
         });

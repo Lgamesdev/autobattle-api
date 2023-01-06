@@ -12,6 +12,7 @@ use App\Enum\EquipmentSlot;
 use App\Repository\CharacterEquipmentRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -49,11 +50,20 @@ class GearController
 
     #[Route('/equip/{id}', name: 'equip_character_equipment', methods: [Request::METHOD_PUT])]
     public function equipCharacterEquipment(CharacterEquipment     $characterEquipment,
+                                            SerializerInterface $serializer,
                                             EntityManagerInterface $entityManager): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();
 
-        $character->equip($characterEquipment);
+        try {
+            $character->equip($characterEquipment);
+        } catch (Exception $e) {
+            return new JsonResponse(
+                $serializer->serialize($e, 'json'),
+                Response::HTTP_FORBIDDEN,
+                [],
+                true);
+        }
 
         $entityManager->persist($character);
         $entityManager->flush();

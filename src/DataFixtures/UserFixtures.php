@@ -38,25 +38,26 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
 
             foreach (StatType::cases() as $statType) {
                 $statValue = match ($statType) {
-                    StatType::HEALTH => rand(90, 110),
+                    StatType::HEALTH => 100,
                     StatType::ARMOR => null,
-                    StatType::SPEED, StatType::DODGE => rand(4, 8),
-                    StatType::DAMAGE => rand(8, 12),
-                    StatType::CRITICAL => rand(6, 12)
+                    StatType::DODGE => 2,
+                    StatType::SPEED, 4,
+                    StatType::DAMAGE => 10,
+                    StatType::CRITICAL => 5
                 };
                 $character->stat($statType, $statValue);
             }
 
             foreach (CurrencyType::cases() as $currencyType)
             {
-                $character->currency($currencyType, rand(100, 150));
+                $character->currency($currencyType, 200);
             }
 
-            foreach (EquipmentSlot::cases() as $equipmentSlot)
+            /*foreach (EquipmentSlot::cases() as $equipmentSlot)
             {
                 if(rand(0, 100) < 50)
                 {
-                    /* @var array<array-key, Equipment> $equipments */
+                    // @var array<array-key, Equipment> $equipments
                     $equipments = $manager->getRepository(Equipment::class)->findByEquipmentSlot($equipmentSlot);
                     $equipment = $equipments[rand(0, (count($equipments) - 1))];
                     $characterEquipment = new CharacterEquipment($equipment);
@@ -81,7 +82,7 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
 
                     $character->equip($characterEquipment);
                 }
-            }
+            }*/
 
             $manager->persist($user);
         }
