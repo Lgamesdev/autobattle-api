@@ -38,7 +38,7 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
                 $equipment->setCost(($i + 1) * 60);
                 $equipment->setSpriteId($i + 1);
                 $equipment->setIsDefaultItem(false);
-                $equipment->setRequiredLevel($i * 8);
+                $equipment->setRequiredLevel(($i * 8) + ($i + 1));
 
                 switch ($equipment->getEquipmentSlot())
                 {
