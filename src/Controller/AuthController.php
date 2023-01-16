@@ -52,9 +52,9 @@ final class AuthController extends AbstractController
                 StatType::HEALTH => 100,
                 StatType::ARMOR => null,
                 StatType::DODGE => 2,
-                StatType::SPEED, 4,
-                StatType::DAMAGE => 10,
-                StatType::CRITICAL => 5
+                StatType::SPEED => 2,
+                StatType::DAMAGE => 15,
+                StatType::CRITICAL => 4
             };
             $user->getCharacter()->stat($statType, $statValue);
         }

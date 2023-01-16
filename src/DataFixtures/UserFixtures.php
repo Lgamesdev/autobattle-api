@@ -41,9 +41,9 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
                     StatType::HEALTH => 100,
                     StatType::ARMOR => null,
                     StatType::DODGE => 2,
-                    StatType::SPEED, 4,
-                    StatType::DAMAGE => 10,
-                    StatType::CRITICAL => 5
+                    StatType::SPEED => 2,
+                    StatType::DAMAGE => 15,
+                    StatType::CRITICAL => 4
                 };
                 $character->stat($statType, $statValue);
             }

@@ -12,11 +12,18 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class FightRepository extends ServiceEntityRepository
 {
+    private const MAX_LEVEL = 100;
+    private const MAX_RANK = 2000;
+    private const MAX_ITERATION = 50;
+    private const LEVEL_ITERATION = self::MAX_LEVEL / self::MAX_ITERATION;
+    private const RANK_ITERATION = self::MAX_RANK / self::MAX_ITERATION;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Fight::class);
@@ -24,6 +31,7 @@ class FightRepository extends ServiceEntityRepository
 
     /**
      * @throws NonUniqueResultException
+     * @throws Exception
      */
     public function createFight(UserCharacter $character): Fight
     {
@@ -35,17 +43,22 @@ class FightRepository extends ServiceEntityRepository
         $opponent = null;
         $i = 0;
 
-        while($opponent == null && $i < 35) {
+        while($opponent == null && $i < self::MAX_ITERATION) {
             try {
                 /** @var UserCharacter $opponent */
                 $opponent = $this->findOpponent($character, $minLevel, $maxLevel, $minRanking, $maxRanking);
             } catch (NoResultException $e) {
-                $minLevel = $character->getLevel() > 2 ? $minLevel - 1 : 1;
-                $maxLevel = $character->getLevel() <= 98 ? $maxLevel + 1 : 100;
-                $minRanking = $character->getRanking() > 100 ? $minRanking - 20 : 0;
-                $maxRanking = $character->getRanking() <= 1900 ? $maxRanking + 20 : 2000;
+                $minLevel = $minLevel > 2 ? $minLevel - self::LEVEL_ITERATION : 1;
+                $maxLevel = $maxLevel <= (self::MAX_LEVEL - self::LEVEL_ITERATION) ? $maxLevel + self::LEVEL_ITERATION : self::MAX_LEVEL;
+                $minRanking = $minRanking > 100 ? $minRanking - self::RANK_ITERATION : 0;
+                $maxRanking = $maxRanking <= 1900 ? $maxRanking + self::RANK_ITERATION : self::MAX_RANK;
             }
             $i++;
+        }
+
+        if($opponent == null)
+        {
+            throw new Exception("no opponent found to fight :(");
         }
 
         $fight = new Fight();

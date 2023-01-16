@@ -131,10 +131,10 @@ class Reward
         $actualRank = $character->getRanking();
         $passedRank = $opponent->getRanking();
 
-        $amount = $playerWin ? $actualLevel * 16 : $actualLevel * 8;
+        $amount = $playerWin ? $actualLevel * 12 : $actualLevel * 3;
 
         $multiplier = 1 +
-            (($actualLevel - $passedLevel) * 0.1)
+            (($actualLevel - $passedLevel) * 0.01)
             + (($actualRank - $passedRank) * 0.01) ;
         $amount = Round($amount * $multiplier);
 
@@ -145,14 +145,14 @@ class Reward
         }
 
         if(!$character->isMaxRank()) {
-            $this->setRanking($amount  * 0.3);
+            $this->setRanking($amount  * 0.1);
         } else {
             $this->setRanking(0);
         }
 
         $currency = new Currency();
         $currency->setCurrency(CurrencyType::GOLD);
-        $currency->setAmount(Round($amount * 0.1));
+        $currency->setAmount(Round($amount * 0.5));
         $this->addCurrency($currency);
 
         //Todo Items

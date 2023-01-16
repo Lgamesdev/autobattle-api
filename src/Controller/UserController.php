@@ -91,6 +91,7 @@ class UserController
             [
                 "level" => $character->getLevel(),
                 "xp" => $character->getExperience(),
+                "statPoint" => $character->getStatPoints(),
                 "ranking" => $character->getRanking(),
             ], 'json'),
             Response::HTTP_OK,

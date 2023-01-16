@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\CharacterStat;
 use App\Entity\User;
-use App\Repository\CharacterEquipmentRepository;
-use App\Repository\CharacterStatRepository;
+use App\Enum\StatType;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -35,6 +37,37 @@ class StatController
             Response::HTTP_OK,
             [],
             true
+        );
+    }
+
+    #[Route('/add', name: 'add_stat_point', methods: [Request::METHOD_PUT])]
+    public function addStatPoint(Request $request,
+                                 SerializerInterface $serializer,
+                                 EntityManagerInterface $entityManager): JsonResponse
+    {
+        $character = $this->getCurrentUser()->getCharacter();
+        $statLabel = json_decode($request->getContent(), true)['statType'];
+
+        $statType = StatType::from($statLabel);
+
+        try {
+            $character->addStatPoint($statType);
+        } catch (Exception $e) {
+            return new JsonResponse(
+                $serializer->serialize($e, 'json'),
+                Response::HTTP_FORBIDDEN,
+                [],
+                true);
+        }
+
+        $entityManager->persist($character);
+        $entityManager->flush();
+
+        return new JsonResponse(
+            null,
+            Response::HTTP_NO_CONTENT,
+            [],
+            false
         );
     }
 

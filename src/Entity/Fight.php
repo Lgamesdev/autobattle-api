@@ -121,7 +121,7 @@ class Fight
         $characterHealth = $characterStats->get(StatType::HEALTH->value);
         $opponentHealth = $opponentStats->get(StatType::HEALTH->value);
 
-        $playerTurn = true;
+        $playerTurn = rand($characterStats->get(StatType::SPEED->value), 100) > rand($opponentStats->get(StatType::SPEED->value), 100);
 
         //dump("character max health : " . $characterHealth);
         //dump("opponent max health : " . $opponentHealth);
@@ -135,11 +135,17 @@ class Fight
                 if(rand(0, 100) > $opponentStats->get(StatType::SPEED->value)) {
                     $action->setPlayerTeam(true);
                     $playerTurn = false;
+                } else {
+                    $action->setPlayerTeam(false);
+                    $playerTurn = true;
                 }
             } else {
                 if(rand(0, 100) > $characterStats->get(StatType::SPEED->value)) {
                     $action->setPlayerTeam(false);
                     $playerTurn = true;
+                } else {
+                    $action->setPlayerTeam(true);
+                    $playerTurn = false;
                 }
             }
 
@@ -147,7 +153,7 @@ class Fight
             if (rand(0, 100) < ($action->isPlayerTeam() ? $characterStats->get(StatType::DODGE->value) : $opponentStats->get(StatType::DODGE->value))) {
                 $action->setDodged(true);
             } else if (rand(0, 100) < ($action->isPlayerTeam() ? $characterStats->get(StatType::CRITICAL->value) : $opponentStats->get(StatType::CRITICAL->value))) {
-                $action->setCritialHit(true);
+                $action->setCriticalHit(true);
                 $damage = ($action->isPlayerTeam() ? $characterStats->get(StatType::DAMAGE->value) : $opponentStats->get(StatType::DAMAGE->value)) * 2;
             } else {
                 $damage = $action->isPlayerTeam() ? $characterStats->get(StatType::DAMAGE->value) : $opponentStats->get(StatType::DAMAGE->value);

@@ -34,7 +34,7 @@ class Action
 
     #[Groups(['fight'])]
     #[Column(type: Types::BOOLEAN)]
-    private bool $critialHit = false;
+    private bool $criticalHit = false;
 
     #[Groups(['fight'])]
     #[Column(type: Types::BOOLEAN)]
@@ -75,14 +75,14 @@ class Action
         $this->damage = $damage;
     }
 
-    public function isCritialHit(): bool
+    public function isCriticalHit(): bool
     {
-        return $this->critialHit;
+        return $this->criticalHit;
     }
 
-    public function setCritialHit(bool $critialHit): void
+    public function setCriticalHit(bool $criticalHit): void
     {
-        $this->critialHit = $critialHit;
+        $this->criticalHit = $criticalHit;
     }
 
     public function isDodged(): bool

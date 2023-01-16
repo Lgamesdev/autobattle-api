@@ -4,40 +4,8 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="2241" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Gear.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="712" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/CharacterEquipment.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="2153" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/GearController.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1445" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/UserController.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1560" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Equipment.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1467" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/UserFixtures.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="2170" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/AuthController.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="33" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Enum/StatType.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1252" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/EquipmentFixtures.php" />
+          <option name="caretOffset" value="967" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Reward.php" />
         </OpenedFileInfo>
       </list>
     </option>

@@ -46,6 +46,9 @@ class UserCharacter
     #[Column(type: Types::INTEGER)]
     private int $experience = 0;
 
+    #[Column(type: Types::INTEGER)]
+    private int $statPoints = 0;
+
     #[Groups(['fighter', 'opponent_fighter'])]
     #[Column(type: Types::INTEGER)]
     private int $ranking = 150;
@@ -124,19 +127,15 @@ class UserCharacter
         return $this->level;
     }
 
-    public function setLevel(int $level): void
+    public function levelUp(): void
     {
-        $this->level = $level;
+        $this->level++;
+        $this->statPoints += 3;
     }
 
     public function getExperience(): int
     {
         return $this->experience;
-    }
-
-    public function setExperience(int $experience): void
-    {
-        $this->experience = $experience;
     }
 
     public function addExperience(int $experience): void
@@ -146,7 +145,32 @@ class UserCharacter
         while(!$this->isMaxLevel() && $this->experience >= $this->CalculateRequiredExperienceForLevel())
         {
             $this->experience -= $this->CalculateRequiredExperienceForLevel();
-            $this->level++;
+            $this->levelUp();
+        }
+    }
+
+    public function getStatPoints(): int
+    {
+        return $this->statPoints;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addStatPoint(StatType $statType): void
+    {
+        if($this->statPoints > 0) {
+            $amount = match ($statType) {
+                StatType::HEALTH => 10,
+                StatType::DAMAGE => 2,
+                StatType::ARMOR, StatType::SPEED, StatType::DODGE, StatType::CRITICAL => 1
+            };
+
+            $this->stat($statType, $amount);
+
+            $this->statPoints--;
+        } else {
+            throw new Exception("No stat point remaining");
         }
     }
 
@@ -162,7 +186,10 @@ class UserCharacter
 
     public function addRanking(int $ranking): void
     {
-        $this->ranking += $ranking;
+        if(!$this->isMaxRank())
+        {
+            $this->ranking += $ranking;
+        }
     }
 
     public function getBody(): Body
@@ -221,9 +248,15 @@ class UserCharacter
 
     public function addStat(CharacterStat $stat): self
     {
-        if (!$this->stats->contains($stat)) {
+        $statsMatched = $this->stats->filter(function($element) use ($stat) {
+            return $element->getStatType() === $stat->getStatType();
+        });
+
+        if($statsMatched->count() > 0) {
+            $statValue = $statsMatched->first()->getValue();
+            $this->stats[$statsMatched->key()]->setValue($statValue + $stat->getValue());
+        } else {
             $this->stats[] = $stat;
-            $stat->setCharacter($this);
         }
 
         return $this;
@@ -235,6 +268,7 @@ class UserCharacter
             $newStat = new CharacterStat();
             $newStat->setStat($stat);
             $newStat->setValue($value);
+            $newStat->setCharacter($this);
             $this->addStat($newStat);
         }
     }
