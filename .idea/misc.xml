@@ -4,12 +4,16 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="822" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Websocket/Chat.php" />
+          <option name="caretOffset" value="522" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Command/ServerCommand.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="1422" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Command/ServerCommand.php" />
+          <option name="caretOffset" value="840" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/User.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="882" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Websocket/Chat.php" />
         </OpenedFileInfo>
       </list>
     </option>

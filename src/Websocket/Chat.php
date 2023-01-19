@@ -8,38 +8,40 @@ use Exception;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use SplObjectStorage;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Chat implements MessageComponentInterface
 {
     protected SplObjectStorage $connections;
 
-    public function __construct() {
-        print('in Chat constructor');
+    private OutputInterface $output;
+
+    public function __construct(OutputInterface $output) {
         $this->connections = new SplObjectStorage;
+        $this->output = $output;
+
     }
 
     public function onOpen(ConnectionInterface $conn) {
-        print('on open');
+        $this->output->writeln('new connection');
         $this->connections->attach($conn);
     }
 
     public function onMessage(ConnectionInterface $from, $msg) {
-        print('on message');
+        $this->output->writeln('new message : '. $msg);
         foreach($this->connections as $connection)
         {
-            if($connection === $from)
-            {
-                continue;
-            }
             $connection->send($msg);
         }
     }
 
     public function onClose(ConnectionInterface $conn) {
+        $this->output->writeln('connection closed');
         $this->connections->detach($conn);
     }
 
     public function onError(ConnectionInterface $conn, Exception $e) {
+        $this->output->writeln('new error');
         $this->connections->detach($conn);
         $conn->close();
     }

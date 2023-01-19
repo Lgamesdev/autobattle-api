@@ -9,14 +9,14 @@ use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'run:websocket-server')]
 class ServerCommand extends Command
 {
-    protected static $defaultName = "run:websocket-server";
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $port = 5120;
@@ -24,7 +24,7 @@ class ServerCommand extends Command
         $server = IoServer::factory(
             new HttpServer(
                 new WsServer(
-                    new Chat()
+                    new Chat($output)
                 )
             ),
             $port
