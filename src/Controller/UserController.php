@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Body;
 use App\Entity\User;
-use App\Repository\FightRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;

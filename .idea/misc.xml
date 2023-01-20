@@ -8,12 +8,32 @@
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Command/ServerCommand.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="840" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/User.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
           <option name="caretOffset" value="882" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Websocket/Chat.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="4880" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Reward.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="607" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/StatController.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="1447" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Command/CreateChannelCommand.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/EquipmentFixtures.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="75" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/UserController.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="9375" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/UserCharacter.php" />
         </OpenedFileInfo>
       </list>
     </option>

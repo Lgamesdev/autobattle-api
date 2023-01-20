@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\Channel;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Command\Command;
@@ -52,8 +53,8 @@ EOT
             throw new Exception('Channel already exists');
         }
 
-        $channel = (new Channel())
-            ->setName($name);
+        $channel = new Channel();
+        $channel->setName($name);
 
         $this->em->persist($channel);
         $this->em->flush();

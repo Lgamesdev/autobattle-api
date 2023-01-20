@@ -131,12 +131,9 @@ class Reward
         $actualRank = $character->getRanking();
         $passedRank = $opponent->getRanking();
 
-        $amount = $playerWin ? $actualLevel * 12 : $actualLevel * 3;
+        $amount = $playerWin ? 8 : 3;
 
-        $multiplier = 1 +
-            (($actualLevel - $passedLevel) * 0.01)
-            + (($actualRank - $passedRank) * 0.01) ;
-        $amount = Round($amount * $multiplier);
+        $amount = $amount * (pow(1 + (log10($actualLevel) * 0.1), $actualLevel));
 
         if(!$character->isMaxLevel()) {
             $this->setExperience($amount);
@@ -144,23 +141,42 @@ class Reward
             $this->setExperience(0);
         }
 
-        if(!$character->isMaxRank()) {
-            $this->setRanking($amount  * 0.1);
+        if($playerWin) {
+            if (!$character->isMaxRank()) {
+                if (!$character->getRanking() + ($amount / 10) > 2000) {
+                    $this->setRanking($amount / 10);
+                } else {
+                    $this->setRanking(2000 - $character->getRanking());
+                }
+            } else {
+                $this->setRanking(0);
+            }
         } else {
-            $this->setRanking(0);
+            if ($character->getRanking() < 0) {
+                if (!($character->getRanking() - ($amount / 12)) < 0) {
+                    $this->setRanking(-($amount / 12));
+                } else {
+                    $this->setRanking(-($character->getRanking()));
+                }
+            } else {
+                $this->setRanking(0);
+            }
         }
 
         $currency = new Currency();
         $currency->setCurrency(CurrencyType::GOLD);
-        $currency->setAmount(Round($amount * 0.5));
+        if($playerWin) {
+            $currency->setAmount(Round($amount / 2));
+        } else {
+            $currency->setAmount(0);
+        }
         $this->addCurrency($currency);
 
         //Todo Items
 
         //
         $character->addExperience($this->experience);
-        $character->addRanking(Round($this->ranking));
+        $character->addRanking($this->ranking);
         $character->getWallet()->addCurrency($currency);
     }
-
 }

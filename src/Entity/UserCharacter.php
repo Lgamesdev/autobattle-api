@@ -47,7 +47,7 @@ class UserCharacter
     private int $experience = 0;
 
     #[Column(type: Types::INTEGER)]
-    private int $statPoints = 0;
+    private int $statPointsSpend = 0;
 
     #[Groups(['fighter', 'opponent_fighter'])]
     #[Column(type: Types::INTEGER)]
@@ -130,7 +130,6 @@ class UserCharacter
     public function levelUp(): void
     {
         $this->level++;
-        $this->statPoints += 3;
     }
 
     public function getExperience(): int
@@ -151,7 +150,7 @@ class UserCharacter
 
     public function getStatPoints(): int
     {
-        return $this->statPoints;
+        return ($this->level * 3) - $this->statPointsSpend;
     }
 
     /**
@@ -159,7 +158,7 @@ class UserCharacter
      */
     public function addStatPoint(StatType $statType): void
     {
-        if($this->statPoints > 0) {
+        if($this->getStatPoints() > 0) {
             $amount = match ($statType) {
                 StatType::HEALTH => 10,
                 StatType::DAMAGE => 2,
@@ -168,7 +167,7 @@ class UserCharacter
 
             $this->stat($statType, $amount);
 
-            $this->statPoints--;
+            $this->statPointsSpend++;
         } else {
             throw new Exception("No stat point remaining");
         }
@@ -331,12 +330,15 @@ class UserCharacter
         return $this->ranking == 2000;
     }
 
+    #[Groups(['fighter'])]
+    #[VirtualProperty]
+    #[SerializedName('requiredExperience')]
     public function CalculateRequiredExperienceForLevel(): int
     {
         $solveForRequiredXp = 0;
 
         for ($levelCycle = 1; $levelCycle <= $this->level; $levelCycle++) {
-            $solveForRequiredXp += Floor($levelCycle + 300 * Pow(2, $levelCycle / 14));
+            $solveForRequiredXp += (int)Floor($levelCycle + 300 * Pow(2, $levelCycle / 14));
         }
 
         return $solveForRequiredXp / 4;
