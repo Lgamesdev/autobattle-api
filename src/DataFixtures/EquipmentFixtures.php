@@ -19,15 +19,17 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
         'Iron',
         'Barbarian',
         'Gladiator',
-        'Infantry'
+        'Infantry',
+        'Knight'
     ];
 
     public function load(ObjectManager $manager): void
     {
+        $levelRequiredGap = (int)(100 / (count($this->equipmentSets) * count(EquipmentSlot::cases())));
+
         for($i = 0; $i <= count($this->equipmentSets) - 1; ++$i) {
             foreach (EquipmentSlot::cases() as $slotIndex => $equipmentsSlot) {
-                if($this->equipmentSets[$i] == 'Beginner' && $equipmentsSlot == EquipmentSlot::HELMET
-                    || $this->equipmentSets[$i] == 'Infantry' && $equipmentsSlot == EquipmentSlot::WEAPON) {
+                if($this->equipmentSets[$i] == 'Beginner' && $equipmentsSlot == EquipmentSlot::HELMET) {
                     continue;
                 }
 
@@ -35,12 +37,11 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
                 $equipment->setEquipmentSlot($equipmentsSlot->value);
                 $equipment->setName($this->equipmentSets[$i] . ' ' . $equipmentsSlot->value);
                 $equipment->setIconPath(sprintf('Icons/Equipment/%1$s/%2$s', $equipmentsSlot->value, $this->equipmentSets[$i]));
-                $equipment->setCost(($i + 1) * 150);
                 $equipment->setSpriteId($i + 1);
                 $equipment->setIsDefaultItem(false);
-
-
-                $equipment->setRequiredLevel(($i * 8) + ($i + 1));
+                $equipment->setRequiredLevel((($i * 4) + ($slotIndex)) * $levelRequiredGap);
+                $equipment->setCost((int)((($i * 4) + ($slotIndex)) * 150 * ($equipment->getRequiredLevel() * 0.1)));
+                //$equipment->setRequiredLevel(($i * 8) + ($i + 1));
 
                 switch ($equipment->getEquipmentSlot())
                 {

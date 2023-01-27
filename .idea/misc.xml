@@ -24,16 +24,20 @@
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Command/CreateChannelCommand.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="0" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/EquipmentFixtures.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
           <option name="caretOffset" value="75" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/UserController.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
           <option name="caretOffset" value="9375" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/UserCharacter.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="2292" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/composer.json" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="1673" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/EquipmentFixtures.php" />
         </OpenedFileInfo>
       </list>
     </option>
