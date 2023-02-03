@@ -36,13 +36,20 @@ class Chat implements MessageComponentInterface
 
         $this->output->writeln('new connection from : ' . $username . ' #' . $conn->resourceId);
 
-        if(array_key_exists($username, $this->users)) {
-            $this->connections->detach($this->users[$username]['connection']);
-            $this->users[$username]['connection']->close();
-            unset($this->users[$username]);
+        $out = array_map(function ($ar) use ($conn) {
+                if ($ar['user'] == $this->getUsername($conn)) {
+                    return $ar;
+                }
+            },
+            $this->users
+        );
+
+        if($out) {
+            $this->connections->detach($this->users[array_key_first($out)]['connection']);
+            $this->users[array_key_first($out)]['connection']->close();
         }
 
-        $this->users[$username] = [
+        $this->users[$conn->resourceId] = [
             'connection' => $conn,
             'user' => $username,
             'channels' => []
@@ -81,7 +88,7 @@ class Chat implements MessageComponentInterface
 
     private function subscribeToChannel(ConnectionInterface $conn, $channel, $user)
     {
-        $this->users[$this->getUsername($conn)]['channels'][$channel] = $channel;
+        $this->users[$conn->resourceId]['channels'][$channel] = $channel;
         $this->sendMessageToChannel(
             $conn,
             $channel,
@@ -92,8 +99,8 @@ class Chat implements MessageComponentInterface
 
     private function unsubscribeFromChannel(ConnectionInterface $conn, $channel, $user)
     {
-        if (array_key_exists($channel, $this->users[$this->getUsername($conn)]['channels'])) {
-            unset($this->users[$this->getUsername($conn)]['channels']);
+        if (array_key_exists($channel, $this->users[$conn->resourceId]['channels'])) {
+            unset($this->users[$conn->resourceId]['channels']);
         }
         $this->sendMessageToChannel(
             $conn,
@@ -105,10 +112,10 @@ class Chat implements MessageComponentInterface
 
     private function sendMessageToChannel(ConnectionInterface $conn, $channel, $user, $message): bool
     {
-        if (!isset($this->users[$this->getUsername($conn)]['channels'][$channel])) {
+        if (!isset($this->users[$conn->resourceId]['channels'][$channel])) {
             return false;
         }
-        foreach ($this->users as $username => $userConnection) {
+        foreach ($this->users as $resourceId => $userConnection) {
             if (array_key_exists($channel, $userConnection['channels'])) {
                 $userConnection['connection']->send(json_encode([
                     'action' => 'message',
@@ -122,8 +129,8 @@ class Chat implements MessageComponentInterface
     }
 
     public function onClose(ConnectionInterface $conn) {
-        $this->output->writeln('connection closed');
-        unset($this->users[$this->getUsername($conn)]);
+        $this->output->writeln('connection closed !');
+        unset($this->users[$conn->resourceId]);
         $this->connections->detach($conn);
     }
 
