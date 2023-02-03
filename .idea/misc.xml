@@ -12,23 +12,11 @@
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/UserController.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="9375" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/UserCharacter.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1109" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/composer.json" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="976" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/DataFixtures/EquipmentFixtures.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="491" />
+          <option name="caretOffset" value="655" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Command/ServerCommand.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="1769" />
+          <option name="caretOffset" value="1288" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Websocket/Chat.php" />
         </OpenedFileInfo>
       </list>
