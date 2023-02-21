@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\EquipmentSlot;
+use App\Exception\CharacterEquipmentException;
 use App\Repository\WalletRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -75,13 +76,13 @@ class Gear
     }
 
     /**
-     * @throws Exception
+     * @throws CharacterEquipmentException
      */
     public function equip(CharacterEquipment $characterEquipment): void
     {
         if($characterEquipment->getItem()->getRequiredLevel() > $this->character->getLevel())
         {
-            throw new Exception("Character level is too low");
+            throw new CharacterEquipmentException("Character level is too low");
         }
 
         $matchedEquipments = $this->equipments->filter(function($element) use ($characterEquipment) {

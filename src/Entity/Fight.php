@@ -17,6 +17,8 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Context;
+use JMS\Serializer\SerializationContext;
 
 #[Entity(repositoryClass: FightRepository::class)]
 class Fight
@@ -101,6 +103,14 @@ class Fight
             $action->setFight($this);
         }
         return $this;
+    }
+
+    public function addActions(ArrayCollection $actions): void
+    {
+        foreach ($actions as $action)
+        {
+            $this->addAction($action);
+        }
     }
 
     public function getReward(): Reward
@@ -190,5 +200,49 @@ class Fight
         $reward = new Reward();
         $this->setReward($reward);
         $reward->generate($this, $this->playerWin);
+    }
+
+    public static function getSerializationContext(): Context|SerializationContext
+    {
+        return SerializationContext::create()->setGroups(array(
+            'fight', // Serialize actions
+            'character' => [
+                'fighter',
+                'body' => ['fighter'],
+                'wallet' => [
+                    'fighter',
+                    'currencies' => ['fighter']
+                ],
+                'stats' => ['fighter'],
+                'gear' => [
+                    'fighter',
+                    'equipments' => [
+                        'fighter',
+                        'item' => [
+                            'fighter',
+                            'stats' => ['fighter']
+                        ],
+                        'modifiers' => ['fighter']
+                    ]
+                ]
+            ],
+
+            'opponent' => [
+                'opponent_fighter',
+                'body' => ['opponent_fighter'],
+                'stats' => ['opponent_fighter'],
+                'gear' => [
+                    'opponent_fighter',
+                    'equipments' => [
+                        'opponent_fighter',
+                        'item' => [
+                            'opponent_fighter',
+                            'stats' => ['opponent_fighter']
+                        ],
+                        'modifiers' => ['opponent_fighter']
+                    ]
+                ]
+            ]
+        ));
     }
 }

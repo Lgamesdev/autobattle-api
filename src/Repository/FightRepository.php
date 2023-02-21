@@ -8,6 +8,7 @@ use App\Entity\Body;
 use App\Entity\Fight;
 use App\Entity\User;
 use App\Entity\UserCharacter;
+use App\Exception\FightException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -30,10 +31,24 @@ class FightRepository extends ServiceEntityRepository
     }
 
     /**
-     * @throws NonUniqueResultException
-     * @throws Exception
+     * @throws FightException
      */
     public function createFight(UserCharacter $character): Fight
+    {
+        $opponent = $this->findOpponent($character);
+
+        $fight = new Fight();
+        $fight->setCharacter($character);
+        $fight->setOpponent($opponent);
+        $fight->generate();
+
+        return $fight;
+    }
+
+    /**
+     * @throws FightException
+     */
+    public function findOpponent(UserCharacter $character): UserCharacter
     {
         $minLevel = $character->getLevel() > 2 ? $character->getLevel() - 2 : 1;
         $maxLevel = $character->getLevel() <= 98 ? $character->getLevel() + 2 : 100;
@@ -46,7 +61,7 @@ class FightRepository extends ServiceEntityRepository
         while($opponent == null && $i < self::MAX_ITERATION) {
             try {
                 /** @var UserCharacter $opponent */
-                $opponent = $this->findOpponent($character, $minLevel, $maxLevel, $minRanking, $maxRanking);
+                $opponent = $this->findNearestCharacter($character, $minLevel, $maxLevel, $minRanking, $maxRanking);
             } catch (NoResultException $e) {
                 $minLevel = $minLevel > 2 ? $minLevel - self::LEVEL_ITERATION : 1;
                 $maxLevel = $maxLevel <= (self::MAX_LEVEL - self::LEVEL_ITERATION) ? $maxLevel + self::LEVEL_ITERATION : self::MAX_LEVEL;
@@ -56,24 +71,17 @@ class FightRepository extends ServiceEntityRepository
             $i++;
         }
 
-        if($opponent == null)
-        {
-            throw new Exception("no opponent found to fight :(");
+        if($opponent == null) {
+            throw new FightException("no opponent found to fight :(");
         }
 
-        $fight = new Fight();
-        $fight->setCharacter($character);
-        $fight->setOpponent($opponent);
-        $fight->generate();
-
-        return $fight;
+        return $opponent;
     }
 
     /**
-     * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    private function findOpponent(UserCharacter $character, $minLevel, $maxLevel, $minRanking, $maxRanking)
+    private function findNearestCharacter(UserCharacter $character, $minLevel, $maxLevel, $minRanking, $maxRanking)
     {
         $characterRepository = $this->getEntityManager()->getRepository(UserCharacter::class);
 

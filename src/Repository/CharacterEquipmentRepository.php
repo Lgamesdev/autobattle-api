@@ -4,8 +4,12 @@ namespace App\Repository;
 
 use App\Entity\CharacterEquipment;
 use App\Entity\UserCharacter;
+use App\Exception\CharacterEquipmentException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 class CharacterEquipmentRepository extends ServiceEntityRepository
 {
@@ -28,5 +32,21 @@ class CharacterEquipmentRepository extends ServiceEntityRepository
             ->setParameter('character', $character);
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function findById(int $id): CharacterEquipment
+    {
+        $qb = $this->createQueryBuilder('character_equipment')
+            ->where('character_equipment.id = :id')
+            ->setParameter('id', $id);
+
+        try {
+            return $qb->getQuery()->getSingleResult();
+        } catch (Exception $e) {
+            throw new CharacterEquipmentException($e->getMessage());
+        }
     }
 }

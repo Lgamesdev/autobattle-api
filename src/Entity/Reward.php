@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Enum\CurrencyType;
-use App\Repository\ActionRepository;
 use App\Repository\RewardRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

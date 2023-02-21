@@ -29,7 +29,7 @@ class RankingController
     }
 
     #[Route(name: 'get', methods: [Request::METHOD_GET])]
-    public function getShopList(CharacterRepository $repository,
+    public function getRankList(CharacterRepository $repository,
                                   SerializerInterface $serializer): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();

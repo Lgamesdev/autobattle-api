@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Fight;
 use App\Entity\User;
+use App\Exception\FightException;
 use App\Repository\FightRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -36,7 +38,7 @@ class FightController
 
         try {
             $fight = $fightRepository->createFight($character);
-        } catch (NoResultException|NonUniqueResultException $e) {
+        } catch (FightException $e) {
             return new JsonResponse(
                 $serializer->serialize($e, 'json'),
                 Response::HTTP_BAD_REQUEST,
@@ -47,49 +49,8 @@ class FightController
         $entityManager->persist($fight);
         $entityManager->flush();
 
-        $context = SerializationContext::create()->setGroups(array(
-            'fight', // Serialize actions
-            'character' => [
-                'fighter',
-                'body' => ['fighter'],
-                'wallet' => [
-                    'fighter',
-                    'currencies' => ['fighter']
-                ],
-                'stats' => ['fighter'],
-                'gear' => [
-                    'fighter',
-                    'equipments' => [
-                        'fighter',
-                        'item' => [
-                            'fighter',
-                            'stats' => ['fighter']
-                        ],
-                        'modifiers' => ['fighter']
-                    ]
-                ]
-            ],
-
-            'opponent' => [
-                'opponent_fighter',
-                'body' => ['opponent_fighter'],
-                'stats' => ['opponent_fighter'],
-                'gear' => [
-                    'opponent_fighter',
-                    'equipments' => [
-                        'opponent_fighter',
-                        'item' => [
-                            'opponent_fighter',
-                            'stats' => ['opponent_fighter']
-                        ],
-                        'modifiers' => ['opponent_fighter']
-                    ]
-                ]
-            ]
-        ));
-
         return new JsonResponse(
-            $serializer->serialize($fight, 'json', $context),
+            $serializer->serialize($fight, 'json', Fight::getSerializationContext()),
             Response::HTTP_OK,
             [],
             true

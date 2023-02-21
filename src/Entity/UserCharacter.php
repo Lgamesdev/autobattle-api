@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Enum\CurrencyType;
 use App\Enum\StatType;
+use App\Exception\CharacterEquipmentException;
 use App\Repository\CharacterRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -75,6 +76,10 @@ class UserCharacter
     #[OneToMany(mappedBy: 'character', targetEntity: Fight::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $fights;
 
+    #[Groups(['message'])]
+    #[OneToMany(mappedBy: 'character', targetEntity: Message::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $messages;
+
     #[Column(type: Types::BOOLEAN)]
     private bool $creationDone = false;
 
@@ -97,6 +102,8 @@ class UserCharacter
 
         $this->stats = new ArrayCollection();
         $this->fights = new ArrayCollection();
+
+        $this->messages = new ArrayCollection();
     }
 
     function getId(): ?int
@@ -114,7 +121,7 @@ class UserCharacter
         $this->user = $user;
     }
 
-    #[Groups(['fighter', 'opponent_fighter'])]
+    #[Groups(['fighter', 'opponent_fighter', 'message'])]
     #[VirtualProperty]
     #[SerializedName('username')]
     public function getUsername(): string
@@ -278,7 +285,7 @@ class UserCharacter
     }
 
     /**
-     * @throws Exception
+     * @throws CharacterEquipmentException
      */
     public function equip(CharacterEquipment $characterEquipment): void
     {
@@ -298,6 +305,16 @@ class UserCharacter
     public function addToInventory(CharacterItem|CharacterEquipment $item): void
     {
         $this->inventory->addCharacterItem($item);
+    }
+
+    public function getFights(): ArrayCollection
+    {
+        return $this->fights;
+    }
+
+    public function getMessages(): ArrayCollection
+    {
+        return $this->messages;
     }
 
     public function isCreationDone(): bool
