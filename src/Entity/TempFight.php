@@ -18,7 +18,6 @@ use Doctrine\ORM\Mapping\OneToOne;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
 
-#[Entity(repositoryClass: FightRepository::class)]
 class TempFight
 {
     private int $actualPlayerLife;
@@ -52,6 +51,11 @@ class TempFight
 
         $this->isFightOver = false;
         $this->isPlayerTurn = $this->playerStats->get(StatType::SPEED->value) > $this->opponentStats->get(StatType::SPEED->value);
+
+        if(!$this->isPlayerTurn)
+        {
+            $this->attack();
+        }
     }
 
     public function attack(): ArrayCollection|Collection
@@ -70,7 +74,11 @@ class TempFight
             if (!$this->fightIsOver())
             {
                 //2nd attack action
-                $this->isPlayerTurn = rand(0, 100) < $this->playerStats->get(StatType::SPEED->value);
+                if(!$this->isPlayerTurn) {
+                    $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::SPEED->value));
+                } else {
+                    $this->isPlayerTurn = rand(0, 100) < $this->playerStats->get(StatType::SPEED->value);
+                }
                 $actions->add($this->createAction());
 
                 if (!$this->fightIsOver())

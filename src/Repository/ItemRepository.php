@@ -14,13 +14,4 @@ class ItemRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Item::class);
     }
-
-    public function findEquipments(): array
-    {
-        return $this->createQueryBuilder('i')
-            ->where('i.type = Equipment')
-            ->orderBy('i.name', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
 }

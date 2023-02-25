@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\BaseCharacterItemRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
@@ -14,10 +15,9 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\InheritanceType;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\MappedSuperclass;
 use JMS\Serializer\Annotation\Groups;
 
-#[Entity()]
+#[Entity(repositoryClass: BaseCharacterItemRepository::class)]
 #[InheritanceType('JOINED')]
 #[DiscriminatorColumn(name: 'type', type: Types::STRING)]
 #[DiscriminatorMap([

@@ -9,6 +9,7 @@ use App\Entity\BaseItem;
 use App\Entity\Equipment;
 use App\Entity\Item;
 use App\Entity\User;
+use App\Exception\ShopException;
 use App\Repository\CharacterEquipmentRepository;
 use App\Repository\EquipmentRepository;
 use App\Repository\ItemRepository;
@@ -47,6 +48,9 @@ class ShopController
         );
     }
 
+    /**
+     * @throws ShopException
+     */
     #[Route('/buy/{id}', name: 'buy_shop_item', methods: [Request::METHOD_POST])]
     public function buyItem(
         BaseItem $item,

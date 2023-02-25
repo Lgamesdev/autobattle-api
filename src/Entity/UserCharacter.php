@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Enum\CurrencyType;
 use App\Enum\StatType;
 use App\Exception\CharacterEquipmentException;
+use App\Exception\ShopException;
+use App\Exception\UserCharacterException;
 use App\Repository\CharacterRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -160,10 +162,11 @@ class UserCharacter
         return ($this->level * 3) - $this->statPointsSpend;
     }
 
+
     /**
-     * @throws Exception
+     * @throws UserCharacterException
      */
-    public function addStatPoint(StatType $statType): void
+    public function addStatPoint(StatType $statType): CharacterStat
     {
         if($this->getStatPoints() > 0) {
             $amount = match ($statType) {
@@ -172,11 +175,11 @@ class UserCharacter
                 StatType::ARMOR, StatType::SPEED, StatType::DODGE, StatType::CRITICAL => 1
             };
 
-            $this->stat($statType, $amount);
-
+            $stat = $this->stat($statType, $amount);
             $this->statPointsSpend++;
+            return $stat;
         } else {
-            throw new Exception("No stat point remaining");
+            throw new UserCharacterException("No stat point remaining");
         }
     }
 
@@ -229,21 +232,27 @@ class UserCharacter
         $this->wallet->addCurrency($curr);
     }
 
+    /**
+     * @throws ShopException
+     */
     public function tryBuy(BaseItem $item): CharacterItem|CharacterEquipment|null
     {
         if($item instanceof Item || $item instanceof Equipment) {
             return $this->wallet->tryBuy($item);
         } else {
-            return null;
+            throw new ShopException('An error occurred when trying to buy item');
         }
     }
 
+    /**
+     * @throws ShopException
+     */
     public function sell(BaseCharacterItem $item): bool
     {
         if($item instanceof CharacterItem || $item instanceof CharacterEquipment) {
             return $this->wallet->sell($item);
         } else {
-            return false;
+            throw new ShopException('An error occurred when trying to sell item');
         }
     }
 
@@ -268,15 +277,16 @@ class UserCharacter
         return $this;
     }
 
-    public function stat(StatType $stat, ?int $value) : void
+    public function stat(StatType $stat, ?int $value) : CharacterStat
     {
+        $newStat = new CharacterStat();
         if($value != null) {
-            $newStat = new CharacterStat();
             $newStat->setStat($stat);
             $newStat->setValue($value);
             $newStat->setCharacter($this);
             $this->addStat($newStat);
         }
+        return $newStat;
     }
 
     public function getGear(): Gear

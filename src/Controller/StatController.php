@@ -27,7 +27,7 @@ class StatController
         $this->tokenStorage = $storage;
     }
 
-    #[Route(name: 'get', methods: [Request::METHOD_GET])]
+    #[Route(name: 'get_character_stats', methods: [Request::METHOD_GET])]
     public function getCharacterStats(SerializerInterface $serializer): JsonResponse
     {
         $character = $this->getCurrentUser()->getCharacter();

@@ -6,8 +6,6 @@ use App\Entity\CharacterEquipment;
 use App\Entity\UserCharacter;
 use App\Exception\CharacterEquipmentException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 
@@ -35,7 +33,7 @@ class CharacterEquipmentRepository extends ServiceEntityRepository
     }
 
     /**
-     * @throws Exception
+     * @throws CharacterEquipmentException
      */
     public function findById(int $id): CharacterEquipment
     {

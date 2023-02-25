@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\BaseItemRepository;
 use App\Repository\ItemRepository;
 use App\Trait\EntityItemTrait;
 use Doctrine\DBAL\Types\Types;
@@ -17,7 +18,7 @@ use Doctrine\ORM\Mapping\InheritanceType;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use JMS\Serializer\Annotation\Groups;
 
-#[Entity()]
+#[Entity(repositoryClass: BaseItemRepository::class)]
 #[InheritanceType('JOINED')]
 #[DiscriminatorColumn(name: 'type', type: Types::STRING)]
 #[DiscriminatorMap(['item' => Item::class, 'equipment' => Equipment::class])]

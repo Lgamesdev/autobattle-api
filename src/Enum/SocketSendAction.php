@@ -2,14 +2,18 @@
 
 namespace App\Enum;
 
-enum SocketAction : string
+enum SocketSendAction : string
 {
+    case INITIALISATION = 'initialisation';
     case SUBSCRIBE = 'subscribe';
     case UNSUBSCRIBE = 'unsubscribe';
     case MESSAGE = 'message';
     case MESSAGE_LIST = 'messageList';
     case SHOP_LIST = 'shopList';
+    case BUY_ITEM = 'buyItem';
+    case SELL_ITEM = 'sellItem';
     case RANK_LIST = 'rankList';
+    case ADD_STAT_POINT = 'addStatPoint';
     case EQUIP = 'equip';
     case UN_EQUIP = 'unEquip';
     case FIGHT_START = 'fightStart';

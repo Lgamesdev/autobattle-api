@@ -88,10 +88,10 @@ class UserController
         return new JsonResponse(
             $serializer->serialize(
             [
-                "level" => $character->getLevel(),
-                "xp" => $character->getExperience(),
-                "statPoint" => $character->getStatPoints(),
-                "ranking" => $character->getRanking(),
+                'level' => $character->getLevel(),
+                'xp' => $character->getExperience(),
+                'statPoint' => $character->getStatPoints(),
+                'ranking' => $character->getRanking(),
             ], 'json'),
             Response::HTTP_OK,
             [],

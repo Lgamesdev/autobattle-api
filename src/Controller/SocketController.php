@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\BaseCharacterItem;
 use App\Entity\BaseItem;
 use App\Entity\CharacterEquipment;
 use App\Entity\Fight;
@@ -11,10 +12,16 @@ use App\Entity\Message;
 use App\Entity\SocketMessage;
 use App\Entity\TempFight;
 use App\Entity\UserCharacter;
-use App\Enum\SocketAction;
+use App\Entity\Wallet;
+use App\Enum\InitialisationStage;
+use App\Enum\SocketReceiveAction;
 use App\Enum\SocketChannel;
+use App\Enum\SocketSendAction;
+use App\Enum\StatType;
 use App\Exception\CharacterEquipmentException;
 use App\Exception\FightException;
+use App\Exception\ShopException;
+use App\Exception\UserCharacterException;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use JMS\Serializer\SerializationContext;
@@ -83,13 +90,13 @@ class SocketController
         ];
 
         $this->connections->attach($conn);
-
-        $this->subscribeToChannel($conn, SocketChannel::DEFAULT->value, $username);
     }
 
     /**
      * @throws FightException
      * @throws CharacterEquipmentException
+     * @throws UserCharacterException
+     * @throws ShopException
      */
     public function handleMessage(ConnectionInterface $from, string $msg): bool
     {
@@ -107,47 +114,67 @@ class SocketController
     /**
      * @throws FightException
      * @throws CharacterEquipmentException
+     * @throws UserCharacterException
+     * @throws ShopException
      */
     private function handleSocketChannel(ConnectionInterface $from, SocketMessage $socketMessage): bool
     {
-        $action = $socketMessage->getAction() ?? 'unknown';
-        $channel = $socketMessage->getChannel() ?? SocketChannel::DEFAULT->value;
-        $username = $socketMessage->getUsername() ?? $this->botName;
-        $content = $socketMessage->getContent() ?? '';
+        $action = empty($socketMessage->getAction()) ? 'unknown' : $socketMessage->getAction();
+        $channel = empty($socketMessage->getChannel()) ? SocketChannel::DEFAULT->value : $socketMessage->getChannel();
+        $username = empty($socketMessage->getUsername()) ? $this->botName : $socketMessage->getUsername();
+        $content = empty($socketMessage->getContent()) ? '' : $socketMessage->getContent();
 
         switch ($channel) {
             case SocketChannel::DEFAULT->value:
                 switch ($action) {
-                    case SocketAction::SUBSCRIBE->value:
+                    case SocketReceiveAction::TRY_SUBSCRIBE->value:
                         $this->subscribeToChannel($from, $content, $username);
                         return true;
-                    case SocketAction::UNSUBSCRIBE->value:
+
+                    case SocketReceiveAction::TRY_UNSUBSCRIBE->value:
                         $this->unsubscribeFromChannel($from, $content, $username);
                         return true;
-                    case SocketAction::EQUIP->value:
+
+                    case SocketReceiveAction::TRY_EQUIP->value:
                         /** @var CharacterEquipment $characterEquipment */
                         $characterEquipment = $this->entityManager->getRepository(CharacterEquipment::class)->findById(intval($content));
                         return $this->equip($from, $username, $characterEquipment);
-                    case SocketAction::UN_EQUIP->value:
+
+                    case SocketReceiveAction::TRY_UN_EQUIP->value:
                         /** @var CharacterEquipment $characterEquipment */
                         $characterEquipment = $this->entityManager->getRepository(CharacterEquipment::class)->findById(intval($content));
                         return $this->unEquip($from, $username, $characterEquipment);
-                    case SocketAction::SHOP_LIST->value:
+
+                    case SocketReceiveAction::TRY_ADD_STAT_POINT->value:
+                        $statLabel = json_decode($content);
+                        $statType = StatType::from($statLabel);
+                        return $this->addStatPoint($from, $username, $statType);
+
+                    case SocketReceiveAction::GET_SHOP_LIST->value:
                         $items = $this->entityManager->getRepository(BaseItem::class)->findAll();
                         $from->send(json_encode([
-                            'action' => SocketAction::SHOP_LIST,
+                            'action' => SocketSendAction::SHOP_LIST,
                             'channel' => SocketChannel::DEFAULT,
                             'username' => $this->botName,
                             'content' => $this->serializer->serialize($items, 'json', SerializationContext::create()->setGroups(['shopList']))
                         ]));
                         return true;
-                    case SocketAction::RANK_LIST->value:
+
+                    case SocketReceiveAction::TRY_BUY_ITEM->value:
+                        $item = $this->entityManager->getRepository(BaseItem::class)->findById(intval($content));
+                        return $this->buyItem($from, $username, $item);
+
+                    case SocketReceiveAction::TRY_SELL_ITEM->value:
+                        $characterItem = $this->entityManager->getRepository(BaseCharacterItem::class)->findById(intval($content));
+                        return $this->sellItem($from, $username, $characterItem);
+
+                    case SocketReceiveAction::GET_RANK_LIST->value:
                         $repository = $this->entityManager->getRepository(UserCharacter::class);
                         /** @var UserCharacter $character */
                         $character = $repository->findPlayerByUsername($username);
                         $characters = $repository->findPlayersByCharacterRank($character);
                         $from->send(json_encode([
-                            'action' => SocketAction::RANK_LIST,
+                            'action' => SocketSendAction::RANK_LIST,
                             'channel' => SocketChannel::DEFAULT,
                             'username' => $this->botName,
                             'content' => $this->serializer->serialize($characters, 'json', SerializationContext::create()->setGroups(['opponent_fighter']))
@@ -160,7 +187,7 @@ class SocketController
                 break;
             case SocketChannel::CHAT_DEFAULT->value:
                 switch ($action) {
-                    case SocketAction::MESSAGE->value:
+                    case SocketReceiveAction::SEND_MESSAGE->value:
                         return $this->sendMessageToChannel($from, $channel, $username, $content);
                     default:
                         echo sprintf('Action "%s" is not supported yet!', $action) . "\n";
@@ -169,7 +196,7 @@ class SocketController
                 break;
             case SocketChannel::FIGHT_SUFFIX->value . $username:
                 switch ($action) {
-                    case SocketAction::ATTACK->value:
+                    case SocketReceiveAction::TRY_ATTACK->value:
                         $this->attack($from, $username);
                         break;
                     default:
@@ -187,6 +214,12 @@ class SocketController
     public function handleClose(ConnectionInterface $conn): void
     {
         $this->writeToConsole('connection closed !');
+        if($this->users[$conn->resourceId]['tempFight'] != null)
+        {
+            $this->entityManager->persist($this->users[$conn->resourceId]['tempFight']->finishFight());
+            $this->entityManager->flush();
+        }
+
         unset($this->users[$conn->resourceId]);
         $this->connections->detach($conn);
     }
@@ -197,8 +230,10 @@ class SocketController
         switch ($e::class) {
             case FightException::class:
             case CharacterEquipmentException::class:
+            case UserCharacterException::class:
+            case ShopException::class:
                 $conn->send(json_encode([
-                    'action' => SocketAction::ERROR,
+                    'action' => SocketSendAction::ERROR,
                     'channel' => SocketChannel::DEFAULT,
                     'type' => gettype($e),
                     'code' => $e->getCode(),
@@ -219,15 +254,35 @@ class SocketController
 
     /**
      * @throws FightException
+     * @throws Exception
      */
-    private function subscribeToChannel(ConnectionInterface $conn, $channel, string $username): void
+    private function subscribeToChannel(ConnectionInterface $conn, string $channel, string $username): void
     {
+        if (array_key_exists($channel, $this->users[$conn->resourceId]['channels'])) {
+            throw new Exception('already subscribed to channel ' . $channel);
+        }
+
         switch ($channel) {
             case SocketChannel::DEFAULT->value:
+                //echo $username . "subscribed to default Channel \n";
+                $character = $this->getCharacter($username);
+                foreach (InitialisationStage::cases() as $stage) {
+                    $conn->send(json_encode([
+                        'action' => SocketSendAction::INITIALISATION,
+                        'channel' => SocketChannel::DEFAULT,
+                        'username' => $this->botName,
+                        'content' => $this->serializer->serialize([
+                                'stage' => $stage->value,
+                                'value' => $this->getInitialisationResult($stage, $character)
+                            ],
+                            'json',
+                        )
+                    ]));
+                }
                 break;
             case SocketChannel::CHAT_DEFAULT->value:
                 $conn->send(json_encode([
-                    'action' => SocketAction::MESSAGE_LIST,
+                    'action' => SocketSendAction::MESSAGE_LIST,
                     'channel' => SocketChannel::CHAT_DEFAULT,
                     'username' => $this->botName,
                     'content' => $this->serializer->serialize(
@@ -239,13 +294,17 @@ class SocketController
                 break;
             case SocketChannel::FIGHT_SUFFIX->value . $username:
                 if(!array_key_exists('tempFight', $this->users[$conn->resourceId])) {
+                    //à voir si peut mieux faire ce check : combat possible sans passer par le main menu...
+                    if (array_key_exists(SocketChannel::DEFAULT->value, $this->users[$conn->resourceId]['channels'])) {
+                        $this->unsubscribeFromChannel($conn, SocketChannel::DEFAULT->value, $username);
+                    }
                     $opponent = $this->entityManager->getRepository(Fight::class)->findOpponent($this->getCharacter($username));
 
                     $this->users[$conn->resourceId]['tempFight']
                         = new TempFight($this->getCharacter($username), $opponent);
 
                     $conn->send(json_encode([
-                        'action' => SocketAction::FIGHT_START,
+                        'action' => SocketSendAction::FIGHT_START,
                         'channel' => SocketChannel::FIGHT_SUFFIX->value . $username,
                         'username' => $this->botName,
                         'content' => $this->serializer->serialize(
@@ -282,8 +341,8 @@ class SocketController
     {
         if (array_key_exists($channel, $this->users[$conn->resourceId]['channels'])) {
             switch ($channel) {
-                case SocketChannel::CHAT_DEFAULT->value:
                 case SocketChannel::DEFAULT->value:
+                case SocketChannel::CHAT_DEFAULT->value:
                     break;
                 case SocketChannel::FIGHT_SUFFIX->value . $username:
                     if($this->users[$conn->resourceId]['tempFight'] != null) {
@@ -306,6 +365,53 @@ class SocketController
             );
         } else {
             throw new Exception('channel not found');
+        }
+    }
+
+    public function getInitialisationResult(InitialisationStage $stage, UserCharacter $character)
+    {
+        switch ($stage)
+        {
+            case InitialisationStage::BODY:
+                return $this->serializer->serialize(
+                    $character->getBody(),
+                    'json',
+                    SerializationContext::create()->setGroups(['body'])
+                );
+            case InitialisationStage::PROGRESSION:
+                return $this->serializer->serialize(
+                    [
+                        'level' => $character->getLevel(),
+                        'xp' => $character->getExperience(),
+                        'statPoint' => $character->getStatPoints(),
+                        'ranking' => $character->getRanking(),
+                    ],
+                    'json'
+                );
+            case InitialisationStage::WALLET:
+                return $this->serializer->serialize(
+                    $this->entityManager->getRepository(Wallet::class)->findCharacterWallet($character),
+                    'json',
+                    SerializationContext::create()->setGroups(['characterWallet'])
+                );
+            case InitialisationStage::EQUIPMENT:
+                return $this->serializer->serialize(
+                    $character->getGear(),
+                    'json',
+                    SerializationContext::create()->setGroups(['gear'])
+                );
+            case InitialisationStage::INVENTORY:
+                return $this->serializer->serialize(
+                    $character->getInventory(),
+                    'json',
+                    SerializationContext::create()->setGroups(['playerInventory'])
+                );
+            case InitialisationStage::CHARACTER_STATS:
+                return $this->serializer->serialize(
+                    $character->getStats(),
+                    'json',
+                    SerializationContext::create()->setGroups(['characterStat'])
+                );
         }
     }
 
@@ -338,6 +444,31 @@ class SocketController
     }
 
     /**
+     * @throws UserCharacterException
+     */
+    private function addStatPoint(ConnectionInterface $conn, string $username, StatType $statType): bool
+    {
+        /** @var UserCharacter $character */
+        $character = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+        $stat = $character->addStatPoint($statType);
+
+        $this->entityManager->persist($character);
+        $this->entityManager->flush();
+
+        $conn->send(json_encode([
+            'action' => SocketSendAction::ADD_STAT_POINT,
+            'channel' => SocketChannel::DEFAULT,
+            'username' => $username,
+            'content' => $this->serializer->serialize(
+                $stat,
+                'json',
+                SerializationContext::create()->setGroups(['characterStat'])
+            )
+        ]));
+        return true;
+    }
+
+    /**
      * @throws CharacterEquipmentException
      */
     private function equip(ConnectionInterface $conn, string $username, CharacterEquipment $characterEquipment): bool
@@ -350,7 +481,7 @@ class SocketController
         $this->entityManager->flush();
 
         $conn->send(json_encode([
-            'action' => SocketAction::EQUIP,
+            'action' => SocketSendAction::EQUIP,
             'channel' => SocketChannel::DEFAULT,
             'username' => $username,
             'content' => $characterEquipment->getId()
@@ -371,11 +502,67 @@ class SocketController
         $this->entityManager->flush();
 
         $conn->send(json_encode([
-            'action' => SocketAction::UN_EQUIP,
+            'action' => SocketSendAction::UN_EQUIP,
             'channel' => SocketChannel::DEFAULT,
             'username' => $username,
             'content' => $characterEquipment->getEquipmentSlot()->value
         ]));
+        return true;
+    }
+
+    /**
+     * @throws ShopException
+     */
+    private function buyItem(ConnectionInterface $conn, string $username, BaseItem $item): bool
+    {
+        /** @var UserCharacter $character */
+        $character = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+
+        $characterItem = $character->tryBuy($item);
+
+        if($characterItem == null) {
+            throw new ShopException('An error occurred during item buy');
+        }
+
+        $this->entityManager->persist($character);
+        $this->entityManager->flush();
+
+        $conn->send(json_encode([
+            'action' => SocketSendAction::BUY_ITEM,
+            'channel' => SocketChannel::DEFAULT,
+            'username' => $username,
+            'content' => $this->serializer->serialize($characterItem, 'json', SerializationContext::create()->setGroups(['playerInventory']))
+        ]));
+
+        return true;
+    }
+
+    /**
+     * @throws ShopException
+     */
+    private function sellItem(ConnectionInterface $conn, string $username, BaseCharacterItem $characterItem): bool
+    {
+        $itemId = $characterItem->getId();
+
+        /** @var UserCharacter $character */
+        $character = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+
+        $isSold = $character->sell($characterItem);
+
+        if(!$isSold) {
+            throw new ShopException('An error has occurred when selling item');
+        }
+
+        $this->entityManager->persist($character);
+        $this->entityManager->flush();
+
+        $conn->send(json_encode([
+            'action' => SocketSendAction::SELL_ITEM,
+            'channel' => SocketChannel::DEFAULT,
+            'username' => $username,
+            'content' => $itemId
+        ]));
+
         return true;
     }
 
@@ -391,9 +578,9 @@ class SocketController
 
         $actions = $this->users[$conn->resourceId]['tempFight']->attack();
         $conn->send(json_encode([
-            'action' => SocketAction::ATTACK,
+            'action' => SocketSendAction::ATTACK,
             'channel' => SocketChannel::FIGHT_SUFFIX->value . $username,
-            'username' => $this->botName,
+            'username' => $username,
             'content' => $this->serializer->serialize(
                 $actions,
                 'json',
@@ -407,7 +594,7 @@ class SocketController
             $this->entityManager->flush();
 
             $conn->send(json_encode([
-                'action' => SocketAction::FIGHT_OVER,
+                'action' => SocketSendAction::FIGHT_OVER,
                 'channel' => SocketChannel::FIGHT_SUFFIX->value . $username,
                 'username' => $this->botName,
                 'content' => $this->serializer->serialize(

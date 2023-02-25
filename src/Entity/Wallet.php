@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\CurrencyType;
+use App\Exception\ShopException;
 use App\Repository\WalletRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -88,6 +89,9 @@ class Wallet
         return $this;
     }
 
+    /**
+     * @throws ShopException
+     */
     public function tryBuy(Item|Equipment $item): CharacterItem|CharacterEquipment|null
     {
         $currencyMatched = $this->currencies->filter(function($element) {
@@ -108,7 +112,7 @@ class Wallet
                 return $characterItem;
             }
         } else {
-            return null;
+            throw new ShopException('Cannot afford item for ' . $item->getCost() . 'gold');
         }
     }
 

@@ -4,9 +4,9 @@ namespace App\Entity;
 
 class SocketMessage
 {
-    private string $action;
-    private string $channel;
-    private string $username;
+    private string $action = '';
+    private string $channel = '';
+    private string $username = '';
     private string $content = '';
 
     /**
