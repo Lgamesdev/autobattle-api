@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\Equipment;
+use App\Entity\UserCharacter;
 use App\Enum\EquipmentSlot;
 use App\Entity\Statistic;
 use App\Enum\StatType;
@@ -25,7 +26,7 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
 
     public function load(ObjectManager $manager): void
     {
-        $levelRequiredGap = (int)(100 / (count($this->equipmentSets) * count(EquipmentSlot::cases())));
+        $levelRequiredGap = (int)(UserCharacter::MAX_LEVEL / (count($this->equipmentSets) * count(EquipmentSlot::cases())));
 
         for($i = 0; $i <= count($this->equipmentSets) - 1; ++$i) {
             foreach (EquipmentSlot::cases() as $slotIndex => $equipmentsSlot) {

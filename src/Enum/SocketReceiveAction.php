@@ -6,6 +6,7 @@ enum SocketReceiveAction : string
 {
     case TRY_SUBSCRIBE = 'trySubscribe';
     case TRY_UNSUBSCRIBE = 'tryUnsubscribe';
+    case TUTORIAL_FINISHED = 'tutorialFinished';
     case SEND_MESSAGE = 'sendMessage';
     case GET_SHOP_LIST = 'getShopList';
     case TRY_BUY_ITEM = 'tryBuyItem';

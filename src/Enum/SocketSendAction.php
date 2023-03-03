@@ -4,9 +4,10 @@ namespace App\Enum;
 
 enum SocketSendAction : string
 {
-    case INITIALISATION = 'initialisation';
     case SUBSCRIBE = 'subscribe';
     case UNSUBSCRIBE = 'unsubscribe';
+    case INITIALISATION = 'initialisation';
+    case TUTORIAL_DONE = 'tutorialDone';
     case MESSAGE = 'message';
     case MESSAGE_LIST = 'messageList';
     case SHOP_LIST = 'shopList';

@@ -32,7 +32,6 @@ class TempFight
     private Fight $fight;
 
     private bool $isPlayerTurn;
-    private bool $isFightOver;
 
     public function __construct(UserCharacter $player, UserCharacter $opponent)
     {
@@ -49,12 +48,11 @@ class TempFight
         $this->fight->setCharacter($player);
         $this->fight->setOpponent($opponent);
 
-        $this->isFightOver = false;
-        $this->isPlayerTurn = $this->playerStats->get(StatType::SPEED->value) > $this->opponentStats->get(StatType::SPEED->value);
+        $this->isPlayerTurn = $this->playerStats->get(StatType::SPEED->value) >= $this->opponentStats->get(StatType::SPEED->value);
 
         if(!$this->isPlayerTurn)
         {
-            $this->attack();
+            $this->fight->addAction($this->createAction());
         }
     }
 
@@ -141,9 +139,6 @@ class TempFight
 
     public function finishFight(): Fight
     {
-        //dump("character max health : " . $characterHealth);
-        //dump("opponent max health : " . $opponentHealth);
-
         while(!$this->fightIsOver())
         {
             $this->fight->addAction($this->createAction());
@@ -172,12 +167,12 @@ class TempFight
                 $opponentArmor = $this->opponentStats->get(StatType::ARMOR->value);
                 $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
                 $this->actualOpponentLife -= $damage;
-                echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
+                //echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
             } else {
                 $characterArmor = $this->playerStats->get(StatType::ARMOR->value);
                 $damage -= ($damage - $characterArmor) > 0 ? $characterArmor : $damage;
                 $this->actualPlayerLife -= $damage;
-                echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
+                //echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
             }
         }
 
@@ -188,8 +183,9 @@ class TempFight
             $this->fight->setPlayerWin($this->actualPlayerLife > 0);
 
             $reward = new Reward();
-            $this->fight->setReward($reward);
             $reward->generate($this->fight, $this->fight->getPlayerWin());
+            $reward->setFight($this->fight);
+            $this->fight->setReward($reward);
         }
 
         return $action;
@@ -197,13 +193,12 @@ class TempFight
 
     public function fightIsOver() : bool
     {
-        if (!$this->isFightOver
-            && ($this->actualPlayerLife <= 0 || $this->actualOpponentLife <= 0))
+        if ($this->actualPlayerLife <= 0 || $this->actualOpponentLife <= 0)
         {
-            $this->isFightOver = true;
+            return true;
+        } else {
+            return false;
         }
-
-        return $this->isFightOver;
     }
 
     public function getFight(): Fight

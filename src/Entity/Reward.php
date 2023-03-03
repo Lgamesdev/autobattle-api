@@ -130,52 +130,62 @@ class Reward
         $actualRank = $character->getRanking();
         $passedRank = $opponent->getRanking();
 
-        $amount = $playerWin ? 8 : 3;
+        $amount = $playerWin ? 138 : 69;
 
-        $amount = $amount * (pow(1 + (log10($actualLevel) * 0.1), $actualLevel));
+        //Experience
+        $expAmount = round(($amount / log(UserCharacter::MAX_LEVEL)) * log($actualLevel) + 20);
 
         if(!$character->isMaxLevel()) {
-            $this->setExperience($amount);
+            $this->setExperience($expAmount);
         } else {
             $this->setExperience(0);
         }
 
-        if($playerWin) {
-            if (!$character->isMaxRank()) {
-                if (!$character->getRanking() + ($amount / 10) > 2000) {
-                    $this->setRanking($amount / 10);
-                } else {
-                    $this->setRanking(2000 - $character->getRanking());
-                }
-            } else {
-                $this->setRanking(0);
-            }
-        } else {
-            if ($character->getRanking() < 0) {
-                if (!($character->getRanking() - ($amount / 12)) < 0) {
-                    $this->setRanking(-($amount / 12));
-                } else {
-                    $this->setRanking(-($character->getRanking()));
-                }
-            } else {
-                $this->setRanking(0);
-            }
-        }
+        //Gold
+        $goldAmount = round(($expAmount * ((($passedLevel / $actualLevel) + ($passedRank / $actualRank)) / 2)) * 1.25);
 
         $currency = new Currency();
         $currency->setCurrency(CurrencyType::GOLD);
         if($playerWin) {
-            $currency->setAmount(Round($amount / 2));
+            $currency->setAmount($goldAmount);
         } else {
             $currency->setAmount(0);
         }
         $this->addCurrency($currency);
 
+        //Ranking
+        $rankAmount = 15;
+        if($playerWin) {
+            $rankAmount = round($rankAmount * ((($passedLevel / $actualLevel) + ($passedRank / $actualRank)) / 2));
+        } else {
+            $rankAmount = -round($rankAmount * ((($actualLevel / $passedLevel) + ($actualRank / $passedRank)) / 2));
+        }
+
+        if($playerWin) {
+            if ($character->isMaxRank()) {
+                $this->setRanking(0);
+            } else {
+                if (($character->getRanking() + $rankAmount) < UserCharacter::MAX_RANK ) {
+                    $this->setRanking($rankAmount);
+                } else {
+                    $this->setRanking(UserCharacter::MAX_RANK - $character->getRanking());
+                }
+            }
+        } else {
+            if (($character->getRanking() - $rankAmount) < 0) {
+                $this->setRanking(0);
+            } else {
+                $this->setRanking($rankAmount);
+            }
+        }
+
         //Todo Items
 
-        //
+        /*echo 'experience amount : ' . $expAmount . "\n";
+        echo 'gold amount : ' . $goldAmount . "\n";
+        echo 'rank amount : ' . $rankAmount . "\n";*/
         $character->addExperience($this->experience);
-        $character->addRanking($this->ranking);
         $character->getWallet()->addCurrency($currency);
+        $character->addRanking($this->ranking);
     }
 }

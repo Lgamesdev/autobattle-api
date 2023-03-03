@@ -30,6 +30,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 /*#[UniqueEntity(fields: 'name', message: 'This character\'s name is already used.')]*/
 class UserCharacter
 {
+    public const MAX_LEVEL = 100;
+    public const MAX_RANK = 2000;
+
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
@@ -349,12 +352,12 @@ class UserCharacter
 
     public function isMaxLevel(): bool
     {
-        return $this->level == 200;
+        return $this->level == self::MAX_LEVEL;
     }
 
     public function isMaxRank(): bool
     {
-        return $this->ranking == 2000;
+        return $this->ranking == self::MAX_RANK;
     }
 
     #[Groups(['fighter'])]

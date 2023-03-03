@@ -135,6 +135,9 @@ class SocketController
                         $this->unsubscribeFromChannel($from, $content, $username);
                         return true;
 
+                    case SocketReceiveAction::TUTORIAL_FINISHED->value:
+                        return $this->tutorialFinished($from, $username);
+
                     case SocketReceiveAction::TRY_EQUIP->value:
                         /** @var CharacterEquipment $characterEquipment */
                         $characterEquipment = $this->entityManager->getRepository(CharacterEquipment::class)->findById(intval($content));
@@ -415,15 +418,32 @@ class SocketController
         }
     }
 
-    private function sendMessageToChannel(ConnectionInterface $conn, $channel, $user, $content): bool
+    private function tutorialFinished(ConnectionInterface $conn, string $username): bool
+    {
+        /** @var UserCharacter $user */
+        $user = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+        $user->setTutorialDone(true);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $conn->send(json_encode([
+            'action' => SocketSendAction::TUTORIAL_DONE,
+            'channel' => SocketChannel::DEFAULT,
+            'username' => $username
+        ]));
+        return true;
+    }
+
+    private function sendMessageToChannel(ConnectionInterface $conn, string $channel, string $username, string $content): bool
     {
         if (!isset($this->users[$conn->resourceId]['channels'][$channel])) {
             return false;
         }
 
-        if($user != $this->botName) {
+        if($username != $this->botName) {
             $message = new Message();
-            $message->setCharacter($this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($user));
+            $message->setCharacter($this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username));
             $message->setContent($content);
 
             $this->entityManager->persist($message);
@@ -433,9 +453,9 @@ class SocketController
         foreach ($this->users as $resourceId => $userConnection) {
             if (array_key_exists($channel, $userConnection['channels'])) {
                 $userConnection['connection']->send(json_encode([
-                    'action' => 'message',
+                    'action' => SocketSendAction::MESSAGE,
                     'channel' => $channel,
-                    'username' => $user,
+                    'username' => $username,
                     'content' => $content
                 ]));
             }
@@ -592,6 +612,12 @@ class SocketController
         {
             $this->entityManager->persist($this->users[$conn->resourceId]['tempFight']->getFight());
             $this->entityManager->flush();
+
+            /*echo 'fight over result : ' . $this->serializer->serialize(
+                $this->users[$conn->resourceId]['tempFight']->getReward(),
+                'json',
+                Fight::getSerializationContext()
+            ) . "\n";*/
 
             $conn->send(json_encode([
                 'action' => SocketSendAction::FIGHT_OVER,
