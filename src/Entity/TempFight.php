@@ -180,10 +180,8 @@ class TempFight
 
         if($this->fightIsOver())
         {
-            $this->fight->setPlayerWin($this->actualPlayerLife > 0);
-
             $reward = new Reward();
-            $reward->generate($this->fight, $this->fight->getPlayerWin());
+            $reward->generate($this->fight, $this->actualPlayerLife > 0);
             $reward->setFight($this->fight);
             $this->fight->setReward($reward);
         }

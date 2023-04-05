@@ -9,10 +9,12 @@ use App\Entity\BaseItem;
 use App\Entity\CharacterEquipment;
 use App\Entity\Fight;
 use App\Entity\Message;
+use App\Entity\Reward;
 use App\Entity\SocketMessage;
 use App\Entity\TempFight;
 use App\Entity\UserCharacter;
 use App\Entity\Wallet;
+use App\Enum\CurrencyType;
 use App\Enum\InitialisationStage;
 use App\Enum\SocketReceiveAction;
 use App\Enum\SocketChannel;
@@ -22,6 +24,7 @@ use App\Exception\CharacterEquipmentException;
 use App\Exception\FightException;
 use App\Exception\ShopException;
 use App\Exception\UserCharacterException;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use JMS\Serializer\SerializationContext;
@@ -174,7 +177,7 @@ class SocketController
                     case SocketReceiveAction::GET_RANK_LIST->value:
                         $repository = $this->entityManager->getRepository(UserCharacter::class);
                         /** @var UserCharacter $character */
-                        $character = $repository->findPlayerByUsername($username);
+                        $character = $this->getCharacter($username);
                         $characters = $repository->findPlayersByCharacterRank($character);
                         $from->send(json_encode([
                             'action' => SocketSendAction::RANK_LIST,
@@ -219,8 +222,17 @@ class SocketController
         $this->writeToConsole('connection closed !');
         if($this->users[$conn->resourceId]['tempFight'] != null)
         {
-            $this->entityManager->persist($this->users[$conn->resourceId]['tempFight']->finishFight());
+            $fight = $this->users[$conn->resourceId]['tempFight']->finishFight();
+            $this->entityManager->persist($fight);
             $this->entityManager->flush();
+
+            echo 'finish fight and persist before closing for '
+                . $this->users[$conn->resourceId]['username'] . ' : '
+                . $this->serializer->serialize(
+                    $fight,
+                    'json',
+                    Fight::getSerializationContext()
+                );
         }
 
         unset($this->users[$conn->resourceId]);
@@ -385,7 +397,8 @@ class SocketController
                 return $this->serializer->serialize(
                     [
                         'level' => $character->getLevel(),
-                        'xp' => $character->getExperience(),
+                        'experience' => $character->getExperience(),
+                        'maxExperience' => $character->calculateRequiredExperienceForLevel(),
                         'statPoint' => $character->getStatPoints(),
                         'ranking' => $character->getRanking(),
                     ],
@@ -421,7 +434,7 @@ class SocketController
     private function tutorialFinished(ConnectionInterface $conn, string $username): bool
     {
         /** @var UserCharacter $user */
-        $user = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+        $user = $this->getCharacter($username);
         $user->setTutorialDone(true);
 
         $this->entityManager->persist($user);
@@ -443,7 +456,7 @@ class SocketController
 
         if($username != $this->botName) {
             $message = new Message();
-            $message->setCharacter($this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username));
+            $message->setCharacter($this->getCharacter($username));
             $message->setContent($content);
 
             $this->entityManager->persist($message);
@@ -469,7 +482,7 @@ class SocketController
     private function addStatPoint(ConnectionInterface $conn, string $username, StatType $statType): bool
     {
         /** @var UserCharacter $character */
-        $character = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+        $character = $this->getCharacter($username);
         $stat = $character->addStatPoint($statType);
 
         $this->entityManager->persist($character);
@@ -494,7 +507,7 @@ class SocketController
     private function equip(ConnectionInterface $conn, string $username, CharacterEquipment $characterEquipment): bool
     {
         /** @var UserCharacter $character */
-        $character = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+        $character = $this->getCharacter($username);
         $character->equip($characterEquipment);
 
         $this->entityManager->persist($character);
@@ -509,13 +522,10 @@ class SocketController
         return true;
     }
 
-    /**
-     * @throws CharacterEquipmentException
-     */
     private function unEquip(ConnectionInterface $conn, string $username, CharacterEquipment $characterEquipment): bool
     {
         /** @var UserCharacter $character */
-        $character = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+        $character = $this->getCharacter($username);
         $character->unEquip($characterEquipment);
 
         $this->entityManager->persist($character);
@@ -536,7 +546,7 @@ class SocketController
     private function buyItem(ConnectionInterface $conn, string $username, BaseItem $item): bool
     {
         /** @var UserCharacter $character */
-        $character = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+        $character = $this->getCharacter($username);
 
         $characterItem = $character->tryBuy($item);
 
@@ -565,7 +575,7 @@ class SocketController
         $itemId = $characterItem->getId();
 
         /** @var UserCharacter $character */
-        $character = $this->entityManager->getRepository(UserCharacter::class)->findPlayerByUsername($username);
+        $character = $this->getCharacter($username);
 
         $isSold = $character->sell($characterItem);
 
@@ -610,10 +620,12 @@ class SocketController
 
         if($this->users[$conn->resourceId]['tempFight']->fightIsOver())
         {
+            $callbackMessages = $this->handleReward($this->users[$conn->resourceId]['tempFight']->getReward());
+
             $this->entityManager->persist($this->users[$conn->resourceId]['tempFight']->getFight());
             $this->entityManager->flush();
 
-            /*echo 'fight over result : ' . $this->serializer->serialize(
+            /*echo $username . 'fight\'s over, result : ' . $this->serializer->serialize(
                 $this->users[$conn->resourceId]['tempFight']->getReward(),
                 'json',
                 Fight::getSerializationContext()
@@ -629,8 +641,67 @@ class SocketController
                     Fight::getSerializationContext()
                 )
             ]));
+
+            foreach ($callbackMessages as $message)
+            {
+                $conn->send($message);
+            }
             $this->unsubscribeFromChannel($conn, SocketChannel::FIGHT_SUFFIX->value . $username, $username);
         }
+    }
+
+    private function handleReward(Reward $reward): ArrayCollection
+    {
+        $callbackMessages = new ArrayCollection();
+
+        $character = $reward->getFight()->getCharacter();
+
+        echo $character->getUsername() . ' (lvl. ' . $character->getLevel() . ') gained xp ' . $reward->getExperience()
+            . ' (actual xp : ' . $character->getExperience() . ' / ' . $character->calculateRequiredExperienceForLevel() . ") \n";
+
+        $experience = $character->getExperience() + $reward->getExperience();
+        while(!$character->isMaxLevel() && $experience >= $character->calculateRequiredExperienceForLevel())
+        {
+            $experience -= $character->calculateRequiredExperienceForLevel();
+            echo $character->getUsername() . " level up ! (level " . $character->getLevel() . ") \n";
+            $callbackMessages->add(json_encode([
+                'action' => SocketSendAction::EXPERIENCE_GAINED,
+                'channel' => SocketChannel::FIGHT_SUFFIX->value . $character->getUsername(),
+                'username' => $this->botName,
+                'content' => $this->serializer->serialize([
+                    'level' => $character->getLevel(),
+                    'oldExperience' => $character->getExperience(),
+                    'aimedExperience' => $character->calculateRequiredExperienceForLevel(),
+                    'maxExperience' => $character->calculateRequiredExperienceForLevel()
+                ],
+                'json',
+                )
+            ]));
+            $character->levelUp();
+        }
+        $callbackMessages->add(json_encode([
+            'action' => SocketSendAction::EXPERIENCE_GAINED,
+            'channel' => SocketChannel::FIGHT_SUFFIX->value . $character->getUsername(),
+            'username' => $this->botName,
+            'content' => $this->serializer->serialize([
+                'level' => $character->getLevel(),
+                'oldExperience' => $character->getExperience(),
+                'aimedExperience' => $experience,
+                'maxExperience' => $character->calculateRequiredExperienceForLevel()
+            ],
+                'json',
+            )
+        ]));
+        $character->setExperience($experience);
+        echo 'new xp for ' . $character->getUsername() . ' (lvl.' . $character->getLevel() . ') : '
+            . $character->getExperience() . ' / ' . $character->calculateRequiredExperienceForLevel() . "\n";
+
+        foreach ($reward->getCurrencies() as $currency) {
+            $character->getWallet()->addCurrency($currency);
+        }
+        $character->addRanking($reward->getRanking());
+
+        return $callbackMessages;
     }
 
     public function getUsername(ConnectionInterface $conn) : string

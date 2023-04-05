@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use App\Entity\UserCharacter;
+use App\Exception\UserCharacterException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -29,7 +30,7 @@ class CharacterRepository extends ServiceEntityRepository
     }
 
     /**
-     * @throws Exception
+     * @throws UserCharacterException
      */
     public function findPlayerByUsername(string $username)
     {
@@ -42,8 +43,11 @@ class CharacterRepository extends ServiceEntityRepository
                 ->getQuery()
                 ->getSingleResult()
                 ->getCharacter();
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+        } catch (NoResultException $e) {
+            throw new UserCharacterException('User not found. error : ' . $e->getMessage());
+        } catch (NonUniqueResultException $e) {
+            throw new UserCharacterException('More than one user found. error : ' . $e->getMessage());
         }
+
     }
 }

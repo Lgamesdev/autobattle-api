@@ -42,6 +42,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Column(type: Types::STRING)]
     private string $password;
 
+    #[Column(type: Types::STRING, length: 100, nullable: true)]
+    private string $resetToken;
+
     #[OneToOne(mappedBy: 'user', targetEntity: UserCharacter::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private UserCharacter $character;
 
@@ -86,6 +89,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     function setPassword(string $password): self
     {
         $this->password = $password;
+        return $this;
+    }
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): self
+    {
+        $this->resetToken = $resetToken;
+
         return $this;
     }
 

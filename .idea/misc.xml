@@ -4,28 +4,12 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="6967" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/TempFight.php" />
+          <option name="caretOffset" value="424" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/config/packages/security.yaml" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="3038" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Fight.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="5214" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Reward.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="196" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Enum/SocketReceiveAction.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1326" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Repository/CharacterRepository.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="18124" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/SocketController.php" />
+          <option name="caretOffset" value="5436" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/AuthController.php" />
         </OpenedFileInfo>
       </list>
     </option>

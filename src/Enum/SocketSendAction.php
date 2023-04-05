@@ -20,5 +20,6 @@ enum SocketSendAction : string
     case FIGHT_START = 'fightStart';
     case ATTACK = 'attack';
     case FIGHT_OVER = 'fightOver';
+    case EXPERIENCE_GAINED = 'experienceGained';
     case ERROR = 'error';
 }

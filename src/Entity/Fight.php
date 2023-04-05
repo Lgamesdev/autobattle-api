@@ -30,10 +30,6 @@ class Fight
     private ?int $id = null;
 
     #[Groups(['fight'])]
-    #[Column(type: Types::BOOLEAN)]
-    private bool $playerWin;
-
-    #[Groups(['fight'])]
     #[ManyToOne(targetEntity: UserCharacter::class, inversedBy: 'fights')]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
@@ -59,16 +55,6 @@ class Fight
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getPlayerWin(): bool
-    {
-        return $this->playerWin;
-    }
-
-    public function setPlayerWin(bool $playerWin): void
-    {
-        $this->playerWin = $playerWin;
     }
 
     public function getCharacter(): UserCharacter
@@ -195,11 +181,9 @@ class Fight
             }
         }
 
-        $this->playerWin = ($characterHealth > 0);
-
         $reward = new Reward();
         $this->setReward($reward);
-        $reward->generate($this, $this->playerWin);
+        $reward->generate($this, ($characterHealth > 0));
     }
 
     public static function getSerializationContext(): Context|SerializationContext

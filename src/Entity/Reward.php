@@ -31,6 +31,10 @@ class Reward
     private Fight $fight;
 
     #[Groups(['fight'])]
+    #[Column(type: Types::BOOLEAN)]
+    private bool $playerWin;
+
+    #[Groups(['fight'])]
     #[Column(type: Types::INTEGER)]
     private int $experience = 0;
 
@@ -71,6 +75,16 @@ class Reward
     public function setFight(Fight $fight): void
     {
         $this->fight = $fight;
+    }
+
+    public function getPlayerWin(): bool
+    {
+        return $this->playerWin;
+    }
+
+    public function setPlayerWin(bool $playerWin): void
+    {
+        $this->playerWin = $playerWin;
     }
 
     public function getExperience(): int
@@ -121,6 +135,8 @@ class Reward
 
     public function generate(Fight $fight, bool $playerWin): void
     {
+        $this->playerWin = $playerWin;
+
         $character = $fight->getCharacter();
         $opponent = $fight->getOpponent();
 
@@ -142,7 +158,7 @@ class Reward
         }
 
         //Gold
-        $goldAmount = round(($expAmount * ((($passedLevel / $actualLevel) + ($passedRank / $actualRank)) / 2)) * 1.25);
+        $goldAmount = round(($expAmount * ((($passedLevel / $actualLevel) + (($passedRank / $actualRank) * 1.25)) / 2)) * 1.10);
 
         $currency = new Currency();
         $currency->setCurrency(CurrencyType::GOLD);
@@ -154,11 +170,9 @@ class Reward
         $this->addCurrency($currency);
 
         //Ranking
-        $rankAmount = 15;
-        if($playerWin) {
-            $rankAmount = round($rankAmount * ((($passedLevel / $actualLevel) + ($passedRank / $actualRank)) / 2));
-        } else {
-            $rankAmount = -round($rankAmount * ((($actualLevel / $passedLevel) + ($actualRank / $passedRank)) / 2));
+        $rankAmount = round(15 * ((($passedLevel / $actualLevel) + (($passedRank / $actualRank) * 1.2)) / 2));
+        if(!$playerWin) {
+            $rankAmount = -$rankAmount;
         }
 
         if($playerWin) {
@@ -184,8 +198,5 @@ class Reward
         /*echo 'experience amount : ' . $expAmount . "\n";
         echo 'gold amount : ' . $goldAmount . "\n";
         echo 'rank amount : ' . $rankAmount . "\n";*/
-        $character->addExperience($this->experience);
-        $character->getWallet()->addCurrency($currency);
-        $character->addRanking($this->ranking);
     }
 }

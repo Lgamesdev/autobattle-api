@@ -142,6 +142,7 @@ class UserCharacter
     public function levelUp(): void
     {
         $this->level++;
+        $this->experience = 0;
     }
 
     public function getExperience(): int
@@ -149,22 +150,15 @@ class UserCharacter
         return $this->experience;
     }
 
-    public function addExperience(int $experience): void
+    public function setExperience(int $experience): void
     {
-        $this->experience += $experience;
-
-        while(!$this->isMaxLevel() && $this->experience >= $this->CalculateRequiredExperienceForLevel())
-        {
-            $this->experience -= $this->CalculateRequiredExperienceForLevel();
-            $this->levelUp();
-        }
+        $this->experience = $experience;
     }
 
     public function getStatPoints(): int
     {
         return ($this->level * 3) - $this->statPointsSpend;
     }
-
 
     /**
      * @throws UserCharacterException
@@ -363,12 +357,12 @@ class UserCharacter
     #[Groups(['fighter'])]
     #[VirtualProperty]
     #[SerializedName('requiredExperience')]
-    public function CalculateRequiredExperienceForLevel(): int
+    public function calculateRequiredExperienceForLevel(): int
     {
         $solveForRequiredXp = 0;
 
         for ($levelCycle = 1; $levelCycle <= $this->level; $levelCycle++) {
-            $solveForRequiredXp += (int)Floor($levelCycle + 300 * Pow(2, $levelCycle / 14));
+            $solveForRequiredXp += (int)floor($levelCycle + 300 * Pow(2, $levelCycle / 14));
         }
 
         return $solveForRequiredXp / 4;
