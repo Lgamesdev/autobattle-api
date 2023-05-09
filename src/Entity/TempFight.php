@@ -48,7 +48,7 @@ class TempFight
         $this->fight->setCharacter($player);
         $this->fight->setOpponent($opponent);
 
-        $this->isPlayerTurn = $this->playerStats->get(StatType::SPEED->value) >= $this->opponentStats->get(StatType::SPEED->value);
+        $this->isPlayerTurn = $this->playerStats->get(StatType::AGILITY->value) >= $this->opponentStats->get(StatType::AGILITY->value);
 
         if(!$this->isPlayerTurn)
         {
@@ -73,9 +73,9 @@ class TempFight
             {
                 //2nd attack action
                 if(!$this->isPlayerTurn) {
-                    $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::SPEED->value));
+                    $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value));
                 } else {
-                    $this->isPlayerTurn = rand(0, 100) < $this->playerStats->get(StatType::SPEED->value);
+                    $this->isPlayerTurn = rand(0, 100) < $this->playerStats->get(StatType::AGILITY->value);
                 }
                 $actions->add($this->createAction());
 
@@ -91,7 +91,7 @@ class TempFight
                         if (!$this->fightIsOver())
                         {
                             //4rth attack action by opponent if he roll speed
-                            $this->isPlayerTurn = rand(0, 100) < $this->opponentStats->get(StatType::SPEED->value);
+                            $this->isPlayerTurn = rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value);
 
                             //Check if it's opponent turn or skip
                             if(!$this->isPlayerTurn) {
@@ -108,7 +108,7 @@ class TempFight
                         }
                     } else {
                         //3rd attack action if opponent roll speed
-                        $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::SPEED->value));
+                        $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value));
 
                         //Check if it's opponent turn or skip
                         if(!$this->isPlayerTurn) {
@@ -153,13 +153,13 @@ class TempFight
         $action->setPlayerTeam($this->isPlayerTurn);
 
         $damage = 0;
-        if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::DODGE->value) : $this->opponentStats->get(StatType::DODGE->value))) {
+        if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::AGILITY->value) : $this->opponentStats->get(StatType::AGILITY->value))) {
             $action->setDodged(true);
-        } else if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::CRITICAL->value) : $this->opponentStats->get(StatType::CRITICAL->value))) {
+        } else if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::LUCK->value) : $this->opponentStats->get(StatType::LUCK->value))) {
             $action->setCriticalHit(true);
-            $damage = ($action->isPlayerTeam() ? $this->playerStats->get(StatType::DAMAGE->value) : $this->opponentStats->get(StatType::DAMAGE->value)) * 2;
+            $damage = ($action->isPlayerTeam() ? $this->playerStats->get(StatType::STRENGTH->value) : $this->opponentStats->get(StatType::STRENGTH->value)) * 2;
         } else {
-            $damage = $action->isPlayerTeam() ? $this->playerStats->get(StatType::DAMAGE->value) : $this->opponentStats->get(StatType::DAMAGE->value);
+            $damage = $action->isPlayerTeam() ? $this->playerStats->get(StatType::STRENGTH->value) : $this->opponentStats->get(StatType::STRENGTH->value);
         }
 
         if(!$action->isDodged()) {

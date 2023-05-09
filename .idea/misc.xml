@@ -4,11 +4,7 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="424" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/config/packages/security.yaml" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="5436" />
+          <option name="caretOffset" value="5199" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/AuthController.php" />
         </OpenedFileInfo>
       </list>

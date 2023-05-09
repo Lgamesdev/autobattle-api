@@ -148,7 +148,7 @@ class Fight
             $damage = 0;
             if (rand(0, 100) < ($action->isPlayerTeam() ? $characterStats->get(StatType::DODGE->value) : $opponentStats->get(StatType::DODGE->value))) {
                 $action->setDodged(true);
-            } else if (rand(0, 100) < ($action->isPlayerTeam() ? $characterStats->get(StatType::CRITICAL->value) : $opponentStats->get(StatType::CRITICAL->value))) {
+            } else if (rand(0, 100) < ($action->isPlayerTeam() ? $characterStats->get(StatType::LUCK->value) : $opponentStats->get(StatType::LUCK->value))) {
                 $action->setCriticalHit(true);
                 $damage = ($action->isPlayerTeam() ? $characterStats->get(StatType::DAMAGE->value) : $opponentStats->get(StatType::DAMAGE->value)) * 2;
             } else {

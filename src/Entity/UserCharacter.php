@@ -168,8 +168,9 @@ class UserCharacter
         if($this->getStatPoints() > 0) {
             $amount = match ($statType) {
                 StatType::HEALTH => 10,
-                StatType::DAMAGE => 2,
-                StatType::ARMOR, StatType::SPEED, StatType::DODGE, StatType::CRITICAL => 1
+                StatType::STRENGTH, StatType::INTELLIGENCE => 2,
+                StatType::AGILITY, StatType::LUCK => 1,
+                default => throw new UserCharacterException("Unexpected stat type")
             };
 
             $stat = $this->stat($statType, $amount);
@@ -406,6 +407,30 @@ class UserCharacter
         }
 
         return $fullStats;
+    }
+
+    /**
+     * @throws UserCharacterException
+     */
+    public function initialize(): void
+    {
+        if(!($this->level > 1)) {
+            foreach (StatType::cases() as $statType) {
+                $statValue = match ($statType) {
+                    StatType::HEALTH => 100,
+                    StatType::STRENGTH => 15,
+                    StatType::LUCK, StatType::AGILITY => 1,
+                    StatType::ARMOR, StatType::INTELLIGENCE => null
+                };
+                $this->stat($statType, $statValue);
+            }
+
+            foreach (CurrencyType::cases() as $currencyType) {
+                $this->currency($currencyType, 200);
+            }
+        } else {
+            throw new UserCharacterException('level is too high for initialization');
+        }
     }
 
     public function getConf(): array

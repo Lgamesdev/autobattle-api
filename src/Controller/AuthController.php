@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\CurrencyType;
 use App\Enum\StatType;
+use App\Exception\UserCharacterException;
 use App\Form\ResetPasswordRequestFormType;
 use App\Repository\UserRepository;
 use App\Service\SendMailService;
@@ -19,6 +20,7 @@ use Google\Service;
 use Google\Service\Drive;
 use Google\Service\Vault\AccountInfo;
 use Google_Client;
+use Google_Service_Drive;
 use Google_Service_Oauth2;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -44,6 +46,9 @@ final class AuthController extends AbstractController
     /*
      * Using Symfony Serializer interface cause JMS serializer don't call constructor
      */
+    /**
+     * @throws UserCharacterException
+     */
     #[Route('/register', name: 'register', methods: Request::METHOD_POST)]
     public function register(Request $request,
                             SerializerInterface $serializer,
@@ -67,22 +72,7 @@ final class AuthController extends AbstractController
 
         $user->setPassword($userPasswordHasher->hashPassword($user, $user->getPassword()));
 
-        foreach (StatType::cases() as $statType) {
-            $statValue = match ($statType) {
-                StatType::HEALTH => 100,
-                StatType::ARMOR => null,
-                StatType::DODGE => 2,
-                StatType::SPEED => 2,
-                StatType::DAMAGE => 15,
-                StatType::CRITICAL => 4
-            };
-            $user->getCharacter()->stat($statType, $statValue);
-        }
-
-        foreach (CurrencyType::cases() as $currencyType)
-        {
-            $user->getCharacter()->currency($currencyType, 200);
-        }
+        $user->getCharacter()->initialize();
 
         $entityManager->persist($user);
 
@@ -127,7 +117,10 @@ final class AuthController extends AbstractController
             $client->setAuthConfig($this->getParameter('app.googleclientconf'));
             $client->addScope(Google_Service_Oauth2::USERINFO_EMAIL);
             $client->addScope(Google_Service_Oauth2::USERINFO_PROFILE);
+            $client->addScope(Google_Service_Drive::DRIVE);
             $accessToken = $client->fetchAccessTokenWithAuthCode($content['code']);
+
+            //dd($accessToken);
 
             if (!isset($accessToken['error'])) {
                 $service = new Drive($client);
@@ -138,6 +131,15 @@ final class AuthController extends AbstractController
 
                 //User doesnt exist, we create it !
                 if (!$existingUser) {
+                    if($content['username'] == null)
+                    {
+                        return new JsonResponse(
+                            $serializer->serialize(new UserCharacterException('auth-0001'), 'json'),
+                            Response::HTTP_BAD_REQUEST,
+                            [],
+                            true);
+                    }
+
                     $existingUser = new User();
                     $existingUser->setUsername($content['username']);
                     $existingUser->setEmail($email);
@@ -155,21 +157,7 @@ final class AuthController extends AbstractController
 
                     $existingUser->setPassword($userPasswordHasher->hashPassword($existingUser, $existingUser->getPassword()));
 
-                    foreach (StatType::cases() as $statType) {
-                        $statValue = match ($statType) {
-                            StatType::HEALTH => 100,
-                            StatType::ARMOR => null,
-                            StatType::DODGE => 2,
-                            StatType::SPEED => 2,
-                            StatType::DAMAGE => 15,
-                            StatType::CRITICAL => 4
-                        };
-                        $existingUser->getCharacter()->stat($statType, $statValue);
-                    }
-
-                    foreach (CurrencyType::cases() as $currencyType) {
-                        $existingUser->getCharacter()->currency($currencyType, 200);
-                    }
+                    $existingUser->getCharacter()->initialize();
                 }
 
                 $jwtToken = $JWTTokenManager->create($existingUser);

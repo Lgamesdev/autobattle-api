@@ -49,11 +49,11 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
                     case EquipmentSlot::HELMET:
                         foreach (StatType::cases() as $statType) {
                             $statValue = match ($statType) {
-                                StatType::HEALTH => 7 * $i + 1,
-                                StatType::DODGE, StatType::DAMAGE => null,
-                                StatType::ARMOR => 3 * $i + 1,
-                                StatType::SPEED => $i + 1,
-                                StatType::CRITICAL => 1 * $i + 1
+                                StatType::HEALTH => 4 * $i + 1,
+                                StatType::ARMOR => 2 * $i + 1,
+                                StatType::STRENGTH => (int)($i * 1.1) + 1,
+                                StatType::AGILITY, StatType::LUCK => 1 * $i + 1,
+                                StatType::INTELLIGENCE => null
                             };
                             $equipment->stat($statType, $statValue);
                         }
@@ -61,11 +61,12 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
                     case EquipmentSlot::CHEST:
                         foreach (StatType::cases() as $statType) {
                             $statValue = match ($statType) {
-                                StatType::HEALTH => 12 * $i + 1,
-                                StatType::DODGE, StatType::CRITICAL => $i + 1,
+                                StatType::HEALTH => 10 * $i + 1,
                                 StatType::ARMOR => 5 * $i + 1,
-                                StatType::SPEED => (int)($i * 1.2) + 1,
-                                StatType::DAMAGE => null,
+                                StatType::STRENGTH => (int)($i * 1.7) + 1,
+                                StatType::AGILITY => (int)($i * 1.2) + 1,
+                                StatType::LUCK => 1 * $i + 1,
+                                StatType::INTELLIGENCE => null,
                             };
                             $equipment->stat($statType, $statValue);
                         }
@@ -73,12 +74,11 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
                     case EquipmentSlot::PANTS:
                         foreach (StatType::cases() as $statType) {
                             $statValue = match ($statType) {
-                                StatType::HEALTH => 10 * $i + 1,
-                                StatType::DODGE => $i + 2,
-                                StatType::ARMOR => 6 * $i + 1,
-                                StatType::CRITICAL => $i + 1,
-                                StatType::SPEED => (int)($i * 1.5) + 1,
-                                StatType::DAMAGE => null,
+                                StatType::HEALTH => 6 * $i + 1,
+                                StatType::ARMOR => 4 * $i + 1,
+                                StatType::STRENGTH => (int)($i * 1.3) + 1,
+                                StatType::AGILITY, StatType::LUCK => 1 * $i + 1,
+                                StatType::INTELLIGENCE => null
                             };
                             $equipment->stat($statType, $statValue);
                         }
@@ -86,31 +86,14 @@ final class EquipmentFixtures extends Fixture /*implements DependentFixtureInter
                     case EquipmentSlot::WEAPON:
                         foreach (StatType::cases() as $statType) {
                             $statValue = match ($statType) {
-                                StatType::HEALTH, StatType::ARMOR, StatType::DODGE => null,
-                                StatType::CRITICAL => 2 * $i + 1,
-                                StatType::SPEED => $i + 1,
-                                StatType::DAMAGE => 10 * ($i + 1),
+                                StatType::HEALTH, StatType::ARMOR, StatType::AGILITY, StatType::INTELLIGENCE => null,
+                                StatType::STRENGTH => 10 * ($i + 1),
+                                StatType::LUCK => 2 * $i + 1,
                             };
                             $equipment->stat($statType, $statValue);
                         }
                         break;
                 }
-
-                /*foreach (StatType::cases() as $statType) {
-                    if ($statType != StatType::DAMAGE && rand(0, 100) < 50) {
-                        $statValue = match ($statType) {
-                            StatType::HEALTH => 15 * $i + 1,
-                            StatType::DODGE => null,
-                            StatType::ARMOR => $equipment->getEquipmentSlot() == EquipmentSlot::WEAPON ? null : 5 * $i + 1,
-                            StatType::SPEED => $i + 1,
-                            StatType::CRITICAL => 2 * $i + 1
-                        };
-                        $equipment->stat($statType, $statValue);
-                    } else if ($statType == StatType::DAMAGE && $equipment->getEquipmentSlot() == EquipmentSlot::WEAPON) {
-                        $statValue = 10 * $i + 1;
-                        $equipment->stat($statType, $statValue);
-                    }
-                }*/
 
                 $manager->persist($equipment);
             }

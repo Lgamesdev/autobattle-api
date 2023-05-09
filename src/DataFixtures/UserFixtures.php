@@ -24,6 +24,9 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
     {
     }
 
+    /**
+     * @throws \App\Exception\UserCharacterException
+     */
     public function load(ObjectManager $manager): void
     {
         for($i = 1; $i <= 25; ++$i) {
@@ -36,22 +39,7 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
             $character->getBody()->setRandomCustomization();
             $character->setRanking(rand(100, 200));
 
-            foreach (StatType::cases() as $statType) {
-                $statValue = match ($statType) {
-                    StatType::HEALTH => 100,
-                    StatType::ARMOR => null,
-                    StatType::DODGE => 2,
-                    StatType::SPEED => 2,
-                    StatType::DAMAGE => 15,
-                    StatType::CRITICAL => 4
-                };
-                $character->stat($statType, $statValue);
-            }
-
-            foreach (CurrencyType::cases() as $currencyType)
-            {
-                $character->currency($currencyType, 200);
-            }
+            $character->initialize();
 
             /*foreach (EquipmentSlot::cases() as $equipmentSlot)
             {

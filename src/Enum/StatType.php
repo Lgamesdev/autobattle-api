@@ -6,8 +6,8 @@ enum StatType: string
 {
     case HEALTH = 'Health';
     case ARMOR = 'Armor';
-    case DAMAGE = 'Damage';
-    case DODGE = 'Dodge';
-    case SPEED = 'Speed';
-    case CRITICAL = 'Critical';
+    case STRENGTH = 'Strength';
+    case AGILITY = 'Agility';
+    case INTELLIGENCE = 'Intelligence';
+    case LUCK = 'Luck';
 }
