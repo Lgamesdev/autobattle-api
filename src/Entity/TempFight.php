@@ -2,10 +2,13 @@
 
 namespace App\Entity;
 
+use App\Enum\FightActionType;
 use App\Enum\StatType;
+use App\Exception\FightException;
 use App\Repository\FightRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
@@ -22,6 +25,9 @@ class TempFight
 {
     private int $actualPlayerLife;
     private int $actualOpponentLife;
+
+    private int $actualPlayerEnergy;
+    private int $actualOpponentEnergy;
 
     private UserCharacter $player;
     private UserCharacter $opponent;
@@ -44,6 +50,9 @@ class TempFight
         $this->actualPlayerLife = $this->playerStats->get(StatType::HEALTH->value);
         $this->actualOpponentLife = $this->opponentStats->get(StatType::HEALTH->value);
 
+        $this->actualPlayerEnergy = 0;
+        $this->actualOpponentEnergy = 0;
+
         $this->fight = new Fight();
         $this->fight->setCharacter($player);
         $this->fight->setOpponent($opponent);
@@ -52,11 +61,14 @@ class TempFight
 
         if(!$this->isPlayerTurn)
         {
-            $this->fight->addAction($this->createAction());
+            $this->fight->addAction($this->createAction(FightActionType::ATTACK));
         }
     }
 
-    public function attack(): ArrayCollection|Collection
+    /**
+     * @throws FightException
+     */
+    public function attack(FightActionType $actionType): ArrayCollection|Collection
     {
         $actions = new ArrayCollection();
 
@@ -64,62 +76,81 @@ class TempFight
             $this->isPlayerTurn = true;
         }
 
-        if(!$this->fightIsOver())
-        {
+        if(!$this->fightIsOver()) {
             //1rst attack action by player
-            $actions->add($this->createAction());
-
-            if (!$this->fightIsOver())
+            if($actionType == FightActionType::SPECIAL_ATTACK
+                && $this->actualPlayerEnergy < 100)
             {
-                //2nd attack action
-                if(!$this->isPlayerTurn) {
-                    $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value));
-                } else {
-                    $this->isPlayerTurn = rand(0, 100) < $this->playerStats->get(StatType::AGILITY->value);
-                }
-                $actions->add($this->createAction());
+                throw new FightException('not enough energy to launch a special attack', 403);
+            }
 
-                if (!$this->fightIsOver())
-                {
-                    //Check if player hitted 2 times (max) in a row, else opponent will try a second hit
-                    if ($this->isPlayerTurn)
-                    {
-                        //3rd attack action by opponent (forced)
-                        $this->isPlayerTurn = false;
-                        $actions->add($this->createAction());
+            if($actionType == FightActionType::PARRY)
+            {
+                $actions->add($this->createAction($actionType));
 
-                        if (!$this->fightIsOver())
-                        {
-                            //4rth attack action by opponent if he roll speed
-                            $this->isPlayerTurn = rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value);
+                $this->fight->addActions($actions);
+                return $actions;
+            } else {
+                $actions->add($this->createAction($actionType));
+
+                if (!$this->fightIsOver()) {
+                    //2nd attack action
+                    if (!$this->isPlayerTurn) {
+                        $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value));
+                    } else {
+                        //Chance to be player turn
+                        $this->isPlayerTurn = rand(0, 100) < $this->playerStats->get(StatType::AGILITY->value);
+                    }
+
+                    //Redo same action type if it's the player turn
+                    if ($this->isPlayerTurn) {
+                        $actions->add($this->createAction($actionType));
+                    } else {
+                        $actions->add($this->createAction($this->opponentAttack()));
+                    }
+
+                    if (!$this->fightIsOver()) {
+                        //Check if player hitted 2 times (max) in a row, else opponent will try a second hit
+                        if ($this->isPlayerTurn) {
+                            //3rd attack action by opponent (forced)
+                            $this->isPlayerTurn = false;
+                            $actions->add($this->createAction($this->opponentAttack()));
+
+                            if (!$this->fightIsOver()) {
+                                //4rth attack action by opponent if he roll speed
+                                $this->isPlayerTurn = rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value);
+
+                                //Check if it's opponent turn or skip
+                                if (!$this->isPlayerTurn) {
+                                    $actions->add($this->createAction($this->opponentAttack()));
+
+                                    if ($this->fightIsOver()) {
+                                        $this->fight->addActions($actions);
+                                        return $actions;
+                                    }
+                                }
+                            } else {
+                                $this->fight->addActions($actions);
+                                return $actions;
+                            }
+                        } else {
+                            //3rd attack action if opponent roll speed
+                            $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value));
 
                             //Check if it's opponent turn or skip
-                            if(!$this->isPlayerTurn) {
-                                $actions->add($this->createAction());
+                            if (!$this->isPlayerTurn) {
+                                $actions->add($this->createAction($this->opponentAttack()));
 
-                                if($this->fightIsOver()) {
+                                if ($this->fightIsOver()) {
                                     $this->fight->addActions($actions);
                                     return $actions;
                                 }
                             }
-                        } else {
+
                             $this->fight->addActions($actions);
                             return $actions;
                         }
                     } else {
-                        //3rd attack action if opponent roll speed
-                        $this->isPlayerTurn = !(rand(0, 100) < $this->opponentStats->get(StatType::AGILITY->value));
-
-                        //Check if it's opponent turn or skip
-                        if(!$this->isPlayerTurn) {
-                            $actions->add($this->createAction());
-
-                            if($this->fightIsOver()) {
-                                $this->fight->addActions($actions);
-                                return $actions;
-                            }
-                        }
-
                         $this->fight->addActions($actions);
                         return $actions;
                     }
@@ -127,9 +158,6 @@ class TempFight
                     $this->fight->addActions($actions);
                     return $actions;
                 }
-            } else {
-                $this->fight->addActions($actions);
-                return $actions;
             }
         }
 
@@ -137,46 +165,128 @@ class TempFight
         return $actions;
     }
 
-    public function finishFight(): Fight
+    private function opponentAttack(): FightActionType
     {
-        while(!$this->fightIsOver())
-        {
-            $this->fight->addAction($this->createAction());
+        if ($this->actualOpponentEnergy == 100) {
+            return FightActionType::SPECIAL_ATTACK;
+        } else {
+            return FightActionType::ATTACK;
         }
-
-        return $this->fight;
     }
 
-    private function createAction(): Action
+    private function createAction(FightActionType $actionType): Action
     {
         $action = new Action();
         $action->setPlayerTeam($this->isPlayerTurn);
+        $action->setActionType($actionType);
 
         $damage = 0;
-        if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::AGILITY->value) : $this->opponentStats->get(StatType::AGILITY->value))) {
-            $action->setDodged(true);
-        } else if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::LUCK->value) : $this->opponentStats->get(StatType::LUCK->value))) {
-            $action->setCriticalHit(true);
-            $damage = ($action->isPlayerTeam() ? $this->playerStats->get(StatType::STRENGTH->value) : $this->opponentStats->get(StatType::STRENGTH->value)) * 2;
-        } else {
-            $damage = $action->isPlayerTeam() ? $this->playerStats->get(StatType::STRENGTH->value) : $this->opponentStats->get(StatType::STRENGTH->value);
-        }
+        $energyGained = 0;
+        if($actionType == FightActionType::PARRY)
+        {
+            $energyGained = 22;
+            $action->setDodged(false);
 
-        if(!$action->isDodged()) {
-            if ($action->isPlayerTeam()) {
-                $opponentArmor = $this->opponentStats->get(StatType::ARMOR->value);
-                $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
-                $this->actualOpponentLife -= $damage;
-                //echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
+            if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::LUCK->value) : $this->opponentStats->get(StatType::LUCK->value))) {
+                $action->setCriticalHit(true);
+                if (rand(0, 100) < ($action->isPlayerTeam() ? $this->opponentStats->get(StatType::LUCK->value) : $this->playerStats->get(StatType::LUCK->value))) {
+                    $damage = $action->isPlayerTeam() ?
+                        $this->opponentStats->get(StatType::STRENGTH->value)
+                        : $this->playerStats->get(StatType::STRENGTH->value);
+                }
             } else {
+                $damage = $action->isPlayerTeam() ?
+                    intval($this->opponentStats->get(StatType::STRENGTH->value) / 2)
+                    : intval($this->playerStats->get(StatType::STRENGTH->value) / 2);
+            }
+
+            if ($action->isPlayerTeam()) {
                 $characterArmor = $this->playerStats->get(StatType::ARMOR->value);
                 $damage -= ($damage - $characterArmor) > 0 ? $characterArmor : $damage;
                 $this->actualPlayerLife -= $damage;
                 //echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
+            } else {
+                $opponentArmor = $this->opponentStats->get(StatType::ARMOR->value);
+                $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
+                $this->actualOpponentLife -= $damage;
+                //echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
             }
+
+        } else {
+            if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::AGILITY->value) : $this->opponentStats->get(StatType::AGILITY->value))) {
+                $action->setDodged(true);
+            } else if (rand(0, 100) < ($action->isPlayerTeam() ? $this->playerStats->get(StatType::LUCK->value) : $this->opponentStats->get(StatType::LUCK->value))) {
+                $action->setCriticalHit(true);
+                switch ($actionType) {
+                    case FightActionType::ATTACK:
+                        $energyGained = 26;
+                        $damage = ($action->isPlayerTeam() ?
+                                $this->playerStats->get(StatType::STRENGTH->value)
+                                : $this->opponentStats->get(StatType::STRENGTH->value)) * 2;
+                        break;
+                    case FightActionType::SPECIAL_ATTACK:
+                        $damage = ($action->isPlayerTeam() ?
+                                $this->playerStats->get(StatType::STRENGTH->value) * 3
+                                : $this->opponentStats->get(StatType::STRENGTH->value) * 3) * 2;
+
+                        if ($action->isPlayerTeam()) {
+                            $this->actualPlayerEnergy = 0;
+                        } else {
+                            $this->actualOpponentEnergy = 0;
+                        }
+                        break;
+                }
+            } else {
+                switch ($actionType) {
+                    case FightActionType::ATTACK:
+                        $energyGained = 19;
+                        $damage = $action->isPlayerTeam() ?
+                            $this->playerStats->get(StatType::STRENGTH->value)
+                            : $this->opponentStats->get(StatType::STRENGTH->value);
+                        break;
+                    case FightActionType::SPECIAL_ATTACK:
+                        $damage = $action->isPlayerTeam() ?
+                            $this->playerStats->get(StatType::STRENGTH->value) * 3
+                            : $this->opponentStats->get(StatType::STRENGTH->value) * 3;
+                        if ($action->isPlayerTeam()) {
+                            $this->actualPlayerEnergy = 0;
+                        } else {
+                            $this->actualOpponentEnergy = 0;
+                        }
+                        break;
+                }
+            }
+
+            if (!$action->isDodged()) {
+                if ($action->isPlayerTeam()) {
+                    $opponentArmor = $this->opponentStats->get(StatType::ARMOR->value);
+                    $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
+                    $this->actualOpponentLife -= $damage;
+                    //echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
+                } else {
+                    $energyGained = 0;
+                    $characterArmor = $this->playerStats->get(StatType::ARMOR->value);
+                    $damage -= ($damage - $characterArmor) > 0 ? $characterArmor : $damage;
+                    $this->actualPlayerLife -= $damage;
+                    //echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
+                }
+            }
+        }
+        if($action->isPlayerTeam())
+        {
+            $energyGained = ($this->actualPlayerEnergy + $energyGained) > 100 ?
+                100 - $this->actualPlayerEnergy
+                : $energyGained;
+            $this->actualPlayerEnergy += $energyGained;
+        } else {
+            $energyGained = ($this->actualPlayerEnergy + $energyGained) > 100 ?
+                100 - $this->actualPlayerEnergy
+                : $energyGained;
+            $this->actualOpponentEnergy += $energyGained;
         }
 
         $action->setDamage($damage);
+        $action->setEnergyGained($energyGained);
 
         if($this->fightIsOver())
         {
@@ -187,6 +297,14 @@ class TempFight
         }
 
         return $action;
+    }
+
+    private function getLastPlayerAction(): ?Action
+    {
+        $criteria = Criteria::create()
+            ->andWhere(Criteria::expr()->eq('playerTurn', true));
+
+        return $this->fight->getActions()->matching($criteria)->last();
     }
 
     public function fightIsOver() : bool
@@ -207,5 +325,16 @@ class TempFight
     public function getReward(): Reward
     {
         return $this->fight->getReward();
+    }
+
+    public function finishFight(): Fight
+    {
+        while(!$this->fightIsOver())
+        {
+            $this->fight->addAction($this->createAction(FightActionType::ATTACK));
+            $this->isPlayerTurn = !$this->isPlayerTurn;
+        }
+
+        return $this->fight;
     }
 }

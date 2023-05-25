@@ -15,6 +15,7 @@ use App\Entity\TempFight;
 use App\Entity\UserCharacter;
 use App\Entity\Wallet;
 use App\Enum\CurrencyType;
+use App\Enum\FightActionType;
 use App\Enum\InitialisationStage;
 use App\Enum\SocketReceiveAction;
 use App\Enum\SocketChannel;
@@ -203,7 +204,8 @@ class SocketController
             case SocketChannel::FIGHT_SUFFIX->value . $username:
                 switch ($action) {
                     case SocketReceiveAction::TRY_ATTACK->value:
-                        $this->attack($from, $username);
+                        $fightAction = FightActionType::from($content);
+                        $this->attack($from, $username, $fightAction);
                         break;
                     default:
                         echo sprintf('Action "%s" is not supported yet!', $action) . "\n";
@@ -599,14 +601,14 @@ class SocketController
     /**
      * @throws FightException
      */
-    private function attack(ConnectionInterface $conn, string $username): void
+    private function attack(ConnectionInterface $conn, string $username, FightActionType $actionType): void
     {
         if (!array_key_exists(SocketChannel::FIGHT_SUFFIX->value . $username, $this->users[$conn->resourceId]['channels'])
             || $this->users[$conn->resourceId]['tempFight'] == null) {
             throw new FightException('No current fight found');
         }
 
-        $actions = $this->users[$conn->resourceId]['tempFight']->attack();
+        $actions = $this->users[$conn->resourceId]['tempFight']->attack($actionType);
         $conn->send(json_encode([
             'action' => SocketSendAction::ATTACK,
             'channel' => SocketChannel::FIGHT_SUFFIX->value . $username,

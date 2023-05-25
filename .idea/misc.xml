@@ -7,6 +7,30 @@
           <option name="caretOffset" value="2331" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/AuthController.php" />
         </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Command/ServerCommand.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="24387" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/SocketController.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="33" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Enum/FightActionType.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="7" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Enum/CurrencyType.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="2960" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Action.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="2091" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/TempFight.php" />
+        </OpenedFileInfo>
       </list>
     </option>
   </component>

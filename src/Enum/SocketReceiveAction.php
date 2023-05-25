@@ -16,4 +16,6 @@ enum SocketReceiveAction : string
     case TRY_EQUIP = 'tryEquip';
     case TRY_UN_EQUIP = 'tryUnEquip';
     case TRY_ATTACK = 'tryAttack';
+    case TRY_DODGE = 'tryDodge';
+    case TRY_SPECIAL_ATTACK = 'trySpecialAttack';
 }

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Enum\CurrencyType;
+use App\Enum\FightActionType;
 use App\Repository\ActionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
@@ -10,7 +12,10 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\SerializedName;
+use JMS\Serializer\Annotation\VirtualProperty;
 
 #[Entity(repositoryClass: ActionRepository::class)]
 class Action
@@ -28,6 +33,10 @@ class Action
     #[Column(type: Types::BOOLEAN)]
     private bool $playerTeam = true;
 
+    #[Exclude]
+    #[Column(type: 'string', enumType: FightActionType::class)]
+    private FightActionType $actionType;
+
     #[Groups(['fight'])]
     #[Column(type: Types::INTEGER)]
     private int $damage = 0;
@@ -39,6 +48,10 @@ class Action
     #[Groups(['fight'])]
     #[Column(type: Types::BOOLEAN)]
     private bool $dodged = false;
+
+    #[Groups(['fight'])]
+    #[Column(type: Types::INTEGER)]
+    private int $energyGained = 0;
 
     public function getId(): ?int
     {
@@ -63,6 +76,24 @@ class Action
     public function setPlayerTeam(bool $playerTeam): void
     {
         $this->playerTeam = $playerTeam;
+    }
+
+    public function getActionType(): FightActionType
+    {
+        return $this->actionType;
+    }
+
+    public function setActionType(FightActionType $actionType): void
+    {
+        $this->actionType = $actionType;
+    }
+
+    #[Groups(['fight'])]
+    #[VirtualProperty]
+    #[SerializedName('actionType')]
+    public function getActionTypeValue(): string
+    {
+        return $this->actionType->value;
     }
 
     public function getDamage(): int
@@ -95,5 +126,13 @@ class Action
         $this->dodged = $dodged;
     }
 
+    public function getEnergyGained(): int
+    {
+        return $this->energyGained;
+    }
 
+    public function setEnergyGained(int $energyGained): void
+    {
+        $this->energyGained = $energyGained;
+    }
 }
