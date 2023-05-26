@@ -30,9 +30,9 @@ class CharacterStat
     #[Exclude]
     private ?int $id = null;
 
-    #[ManyToOne(targetEntity: UserCharacter::class, inversedBy: 'stats')]
-    #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
-    private UserCharacter $character;
+    #[ManyToOne(targetEntity: Fighter::class, inversedBy: 'stats')]
+    #[JoinColumn(name: 'fighter_id', referencedColumnName: 'id')]
+    private Fighter $fighter;
 
     #[Column(type: 'string', enumType: StatType::class)]
     #[Exclude]
@@ -47,14 +47,14 @@ class CharacterStat
         return $this->id;
     }
 
-    public function getCharacter(): UserCharacter
+    public function getFighter(): Fighter
     {
-        return $this->character;
+        return $this->fighter;
     }
 
-    public function setCharacter(UserCharacter $character): void
+    public function setFighter(Fighter $fighter): void
     {
-        $this->character = $character;
+        $this->fighter = $fighter;
     }
 
     public function getStat(): StatType

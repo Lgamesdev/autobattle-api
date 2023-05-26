@@ -16,6 +16,7 @@ use App\Entity\UserCharacter;
 use App\Entity\Wallet;
 use App\Enum\CurrencyType;
 use App\Enum\FightActionType;
+use App\Enum\FightType;
 use App\Enum\InitialisationStage;
 use App\Enum\SocketReceiveAction;
 use App\Enum\SocketChannel;
@@ -41,6 +42,9 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class SocketController
 {
+    private const PVE_SUFFIX = "pve_";
+    private const PVP_SUFFIX = "pvp_";
+
     private string $botName = 'ChatBot';
     private array $users = [];
 
@@ -127,12 +131,13 @@ class SocketController
         $channel = empty($socketMessage->getChannel()) ? SocketChannel::DEFAULT->value : $socketMessage->getChannel();
         $username = empty($socketMessage->getUsername()) ? $this->botName : $socketMessage->getUsername();
         $content = empty($socketMessage->getContent()) ? '' : $socketMessage->getContent();
+        $type = empty($socketMessage->getType()) ? '' : $socketMessage->getType();
 
         switch ($channel) {
             case SocketChannel::DEFAULT->value:
                 switch ($action) {
                     case SocketReceiveAction::TRY_SUBSCRIBE->value:
-                        $this->subscribeToChannel($from, $content, $username);
+                        $this->subscribeToChannel($from, $content, $username, $type);
                         return true;
 
                     case SocketReceiveAction::TRY_UNSUBSCRIBE->value:
@@ -258,12 +263,11 @@ class SocketController
                 ]));
                 break;
             default:
-                /*$conn->send(new JsonResponse(
-                    $this->serializer->serialize($e, 'json'),
-                    Response::HTTP_FORBIDDEN,
-                    [],
-                    true)
-                );*/
+                $conn->send(json_encode([
+                    'action' => SocketSendAction::ERROR,
+                    'channel' => SocketChannel::DEFAULT,
+                    'content' => $this->serializer->serialize($e, 'json')
+                ]));
                 $this->connections->detach($conn);
                 $conn->close();
         }
@@ -273,7 +277,7 @@ class SocketController
      * @throws FightException
      * @throws Exception
      */
-    private function subscribeToChannel(ConnectionInterface $conn, string $channel, string $username): void
+    private function subscribeToChannel(ConnectionInterface $conn, string $channel, string $username, string $type): void
     {
         if (array_key_exists($channel, $this->users[$conn->resourceId]['channels'])) {
             throw new Exception('already subscribed to channel ' . $channel);
@@ -310,30 +314,42 @@ class SocketController
                 ]));
                 break;
             case SocketChannel::FIGHT_SUFFIX->value . $username:
-                if(!array_key_exists('tempFight', $this->users[$conn->resourceId])) {
-                    //à voir si peut mieux faire ce check : combat possible sans passer par le main menu...
-                    if (array_key_exists(SocketChannel::DEFAULT->value, $this->users[$conn->resourceId]['channels'])) {
-                        $this->unsubscribeFromChannel($conn, SocketChannel::DEFAULT->value, $username);
+                if(!empty($type)) {
+                    if (!array_key_exists('tempFight', $this->users[$conn->resourceId])) {
+                        //à voir si peut mieux faire ce check : combat possible sans passer par le main menu...
+                        if (array_key_exists(SocketChannel::DEFAULT->value, $this->users[$conn->resourceId]['channels'])) {
+                            $this->unsubscribeFromChannel($conn, SocketChannel::DEFAULT->value, $username);
+                        }
+                        $fightType = FightType::tryFrom($type);
+
+                        if(!empty($fightType)) {
+                            $opponent = $this->entityManager->getRepository(Fight::class)->findOpponent($this->getCharacter($username), $fightType);
+
+                            $this->users[$conn->resourceId]['tempFight']
+                                = new TempFight($this->getCharacter($username), $opponent, $fightType);
+
+                            echo "generating pve fight \n";
+
+                            $conn->send(json_encode([
+                                'action' => SocketSendAction::FIGHT_START,
+                                'channel' => SocketChannel::FIGHT_SUFFIX->value . $username,
+                                'username' => $this->botName,
+                                'content' => $this->serializer->serialize(
+                                    $this->users[$conn->resourceId]['tempFight']->getFight(),
+                                    'json',
+                                    Fight::getSerializationContext()
+                                )
+                            ]));
+
+                            //$this->attack($conn, $username);
+                        } else {
+                            throw new FightException('fightType not found');
+                        }
+                    } else {
+                        throw new FightException('A fight is already launched');
                     }
-                    $opponent = $this->entityManager->getRepository(Fight::class)->findOpponent($this->getCharacter($username));
-
-                    $this->users[$conn->resourceId]['tempFight']
-                        = new TempFight($this->getCharacter($username), $opponent);
-
-                    $conn->send(json_encode([
-                        'action' => SocketSendAction::FIGHT_START,
-                        'channel' => SocketChannel::FIGHT_SUFFIX->value . $username,
-                        'username' => $this->botName,
-                        'content' => $this->serializer->serialize(
-                            $this->users[$conn->resourceId]['tempFight']->getFight(),
-                            'json',
-                            Fight::getSerializationContext()
-                        )
-                    ]));
-
-                    //$this->attack($conn, $username);
                 } else {
-                    throw new FightException('A fight is already launched');
+                    throw new FightException('Error while initializing the type of fight');
                 }
                 break;
             default:
@@ -702,6 +718,10 @@ class SocketController
             $character->getWallet()->addCurrency($currency);
         }
         $character->addRanking($reward->getRanking());
+
+        if($reward->getFight()->getFightType() == FightType::PVE && $reward->getPlayerWin()) {
+            $character->addHeroDefeated();
+        }
 
         return $callbackMessages;
     }

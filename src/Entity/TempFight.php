@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\FightActionType;
+use App\Enum\FightType;
 use App\Enum\StatType;
 use App\Exception\FightException;
 use App\Repository\FightRepository;
@@ -30,7 +31,7 @@ class TempFight
     private int $actualOpponentEnergy;
 
     private UserCharacter $player;
-    private UserCharacter $opponent;
+    private Fighter $opponent;
 
     private ArrayCollection $playerStats;
     private ArrayCollection $opponentStats;
@@ -39,7 +40,7 @@ class TempFight
 
     private bool $isPlayerTurn;
 
-    public function __construct(UserCharacter $player, UserCharacter $opponent)
+    public function __construct(UserCharacter $player, Fighter $opponent, FightType $fightType)
     {
         $this->player = $player;
         $this->opponent = $opponent;
@@ -54,6 +55,7 @@ class TempFight
         $this->actualOpponentEnergy = 0;
 
         $this->fight = new Fight();
+        $this->fight->setFightType($fightType);
         $this->fight->setCharacter($player);
         $this->fight->setOpponent($opponent);
 

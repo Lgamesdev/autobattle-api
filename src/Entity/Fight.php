@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Enum\CurrencyType;
+use App\Enum\FightType;
 use App\Enum\StatType;
 use App\Repository\FightRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -17,6 +19,8 @@ use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\SerializedName;
+use JMS\Serializer\Annotation\VirtualProperty;
 use JMS\Serializer\Context;
 use JMS\Serializer\SerializationContext;
 
@@ -29,15 +33,19 @@ class Fight
     #[Exclude]
     private ?int $id = null;
 
+    #[Exclude]
+    #[Column(type: 'string', enumType: FightType::class)]
+    private FightType $fightType;
+
     #[Groups(['fight'])]
     #[ManyToOne(targetEntity: UserCharacter::class, inversedBy: 'fights')]
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     private UserCharacter $character;
 
     #[Groups(['fight'])]
-    #[ManyToOne(targetEntity: UserCharacter::class)]
+    #[ManyToOne(targetEntity: Fighter::class, cascade: ['persist', 'remove'])]
     #[JoinColumn(name: 'opponent_id', referencedColumnName: 'id')]
-    private UserCharacter $opponent;
+    private Fighter $opponent;
 
     #[Groups(['fight'])]
     #[OneToMany(mappedBy: 'fight', targetEntity: Action::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -57,6 +65,24 @@ class Fight
         return $this->id;
     }
 
+    public function getFightType(): FightType
+    {
+        return $this->fightType;
+    }
+
+    public function setFightType(FightType $fightType): void
+    {
+        $this->fightType = $fightType;
+    }
+
+    #[Groups(['fight'])]
+    #[VirtualProperty]
+    #[SerializedName('fightType')]
+    public function getFightTypeValue(): string
+    {
+        return $this->fightType->value;
+    }
+
     public function getCharacter(): UserCharacter
     {
         return $this->character;
@@ -67,12 +93,12 @@ class Fight
         $this->character = $character;
     }
 
-    public function getOpponent(): UserCharacter
+    public function getOpponent(): Fighter
     {
         return $this->opponent;
     }
 
-    public function setOpponent(UserCharacter $opponent): void
+    public function setOpponent(Fighter $opponent): void
     {
         $this->opponent = $opponent;
     }
@@ -117,7 +143,7 @@ class Fight
         $characterHealth = $characterStats->get(StatType::HEALTH->value);
         $opponentHealth = $opponentStats->get(StatType::HEALTH->value);
 
-        $playerTurn = rand($characterStats->get(StatType::SPEED->value), 100) > rand($opponentStats->get(StatType::SPEED->value), 100);
+        $playerTurn = rand($characterStats->get(StatType::AGILITY->value), 100) > rand($opponentStats->get(StatType::AGILITY->value), 100);
 
         //dump("character max health : " . $characterHealth);
         //dump("opponent max health : " . $opponentHealth);
@@ -128,7 +154,7 @@ class Fight
 
             if($playerTurn)
             {
-                if(rand(0, 100) > $opponentStats->get(StatType::SPEED->value)) {
+                if(rand(0, 100) > $opponentStats->get(StatType::AGILITY->value)) {
                     $action->setPlayerTeam(true);
                     $playerTurn = false;
                 } else {
@@ -136,7 +162,7 @@ class Fight
                     $playerTurn = true;
                 }
             } else {
-                if(rand(0, 100) > $characterStats->get(StatType::SPEED->value)) {
+                if(rand(0, 100) > $characterStats->get(StatType::AGILITY->value)) {
                     $action->setPlayerTeam(false);
                     $playerTurn = true;
                 } else {
@@ -146,13 +172,13 @@ class Fight
             }
 
             $damage = 0;
-            if (rand(0, 100) < ($action->isPlayerTeam() ? $characterStats->get(StatType::DODGE->value) : $opponentStats->get(StatType::DODGE->value))) {
+            if (rand(0, 100) < ($action->isPlayerTeam() ? $characterStats->get(StatType::AGILITY->value) : $opponentStats->get(StatType::AGILITY->value))) {
                 $action->setDodged(true);
             } else if (rand(0, 100) < ($action->isPlayerTeam() ? $characterStats->get(StatType::LUCK->value) : $opponentStats->get(StatType::LUCK->value))) {
                 $action->setCriticalHit(true);
-                $damage = ($action->isPlayerTeam() ? $characterStats->get(StatType::DAMAGE->value) : $opponentStats->get(StatType::DAMAGE->value)) * 2;
+                $damage = ($action->isPlayerTeam() ? $characterStats->get(StatType::STRENGTH->value) : $opponentStats->get(StatType::STRENGTH->value)) * 2;
             } else {
-                $damage = $action->isPlayerTeam() ? $characterStats->get(StatType::DAMAGE->value) : $opponentStats->get(StatType::DAMAGE->value);
+                $damage = $action->isPlayerTeam() ? $characterStats->get(StatType::STRENGTH->value) : $opponentStats->get(StatType::STRENGTH->value);
             }
 
             if(!$action->isDodged()) {

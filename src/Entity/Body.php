@@ -23,9 +23,9 @@ class Body
     #[Exclude]
     private ?int $id = null;
 
-    #[OneToOne(inversedBy: 'body', targetEntity: UserCharacter::class)]
-    #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
-    private UserCharacter $character;
+    #[OneToOne(inversedBy: 'body', targetEntity: Fighter::class)]
+    #[JoinColumn(name: 'fighter_id', referencedColumnName: 'id')]
+    private Fighter $fighter;
 
     #[Groups(['body', 'fighter', 'opponent_fighter'])]
     #[Column(type: Types::BOOLEAN)]
@@ -80,14 +80,14 @@ class Body
         return $this->id;
     }
 
-    public function getCharacter(): UserCharacter
+    public function getFighter(): Fighter
     {
-        return $this->character;
+        return $this->fighter;
     }
 
-    public function setCharacter(UserCharacter $character): void
+    public function setFighter(Fighter $fighter): void
     {
-        $this->character = $character;
+        $this->fighter = $fighter;
     }
 
     public function isMaleGender(): bool
@@ -225,6 +225,5 @@ class Body
             }
         }
 
-        $this->character->setCreationDone(true);
     }
 }

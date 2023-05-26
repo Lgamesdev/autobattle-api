@@ -37,6 +37,7 @@ final class UserFixtures extends Fixture implements DependentFixtureInterface
 
             $character = $user->getCharacter();
             $character->getBody()->setRandomCustomization();
+            $character->setCreationDone(true);
             $character->setRanking(rand(100, 200));
 
             $character->initialize();

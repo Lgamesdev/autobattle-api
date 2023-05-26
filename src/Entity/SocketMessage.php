@@ -8,6 +8,7 @@ class SocketMessage
     private string $channel = '';
     private string $username = '';
     private string $content = '';
+    private string $type = '';
 
     /**
      * @return string
@@ -71,6 +72,22 @@ class SocketMessage
     public function setContent(string $content): void
     {
         $this->content = $content;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setType(string $type): void
+    {
+        $this->type = $type;
     }
 }
 

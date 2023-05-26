@@ -28,25 +28,25 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[Entity(repositoryClass: CharacterRepository::class)]
 /*#[UniqueEntity(fields: 'name', message: 'This character\'s name is already used.')]*/
-class UserCharacter
+class UserCharacter extends Fighter
 {
     public const MAX_LEVEL = 100;
     public const MAX_RANK = 2000;
 
-    #[Id]
+    /*#[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
     #[Exclude]
-    private ?int $id = null;
+    private ?int $id = null;*/
 
     #[OneToOne(inversedBy: 'character', targetEntity: User::class)]
     #[JoinColumn(name: 'user_id', referencedColumnName: 'id')]
     private User $user;
 
-    #[Groups(['fighter', 'opponent_fighter'])]
+    /*#[Groups(['fighter', 'opponent_fighter'])]
     #[Column(type: Types::INTEGER)]
     #[Assert\Range(notInRangeMessage: "minimum character\'s level must be 1 at minimum", min: 1)]
-    private int $level = 1;
+    private int $level = 1;*/
 
     #[Groups(['fighter'])]
     #[Column(type: Types::INTEGER)]
@@ -55,21 +55,24 @@ class UserCharacter
     #[Column(type: Types::INTEGER)]
     private int $statPointsSpend = 0;
 
+    #[Column(type: Types::INTEGER)]
+    private int $heroDefeated = 0;
+
     #[Groups(['fighter', 'opponent_fighter'])]
     #[Column(type: Types::INTEGER)]
     private int $ranking = 150;
 
-    #[Groups(['fighter', 'opponent_fighter'])]
+    /*#[Groups(['fighter', 'opponent_fighter'])]
     #[OneToOne(mappedBy: 'character', targetEntity: Body::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Body $body;
+    private Body $body;*/
 
     #[Groups(['fighter'])]
     #[OneToOne(mappedBy: 'character', targetEntity: Wallet::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Wallet $wallet;
 
-    #[Groups(['fighter', 'opponent_fighter'])]
+    /*#[Groups(['fighter', 'opponent_fighter'])]
     #[OneToMany(mappedBy: 'character', targetEntity: CharacterStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $stats;
+    private Collection $stats;*/
 
     #[Groups(['fighter', 'opponent_fighter'])]
     #[OneToOne(mappedBy: 'character', targetEntity: Gear::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -93,8 +96,10 @@ class UserCharacter
 
     public function __construct()
     {
-        $this->body = new Body();
-        $this->body->setCharacter($this);
+        parent::__construct();
+
+        /*$this->body = new Body();
+        $this->body->setFighter($this);*/
 
         $this->wallet = new Wallet();
         $this->wallet->setCharacter($this);
@@ -105,16 +110,16 @@ class UserCharacter
         $this->inventory = new Inventory();
         $this->inventory->setCharacter($this);
 
-        $this->stats = new ArrayCollection();
+        //$this->stats = new ArrayCollection();
         $this->fights = new ArrayCollection();
 
         $this->messages = new ArrayCollection();
     }
 
-    function getId(): ?int
+    /*function getId(): ?int
     {
         return $this->id;
-    }
+    }*/
 
     public function getUser(): User
     {
@@ -134,10 +139,15 @@ class UserCharacter
         return $this->user->getUsername();
     }
 
-    public function getLevel(): int
+    /*public function getLevel(): int
     {
         return $this->level;
     }
+
+    public function setLevel(int $level) : void
+    {
+        $this->level = $level;
+    }*/
 
     public function levelUp(): void
     {
@@ -181,6 +191,16 @@ class UserCharacter
         }
     }
 
+    public function addHeroDefeated(): void
+    {
+        $this->heroDefeated++;
+    }
+
+    public function getHeroDefeated(): int
+    {
+        return $this->heroDefeated;
+    }
+
     public function getRanking(): int
     {
         return $this->ranking;
@@ -199,7 +219,7 @@ class UserCharacter
         }
     }
 
-    public function getBody(): Body
+    /*public function getBody(): Body
     {
         return $this->body;
     }
@@ -214,7 +234,7 @@ class UserCharacter
         $this->body->setMoustacheIndex($body->getMoustacheIndex());
         $this->body->setShortColor($body->getShortColor());
         $this->body->setSkinColor($body->getSkinColor());
-    }
+    }*/
 
     public function getWallet(): Wallet
     {
@@ -254,7 +274,7 @@ class UserCharacter
         }
     }
 
-    public function getStats(): ArrayCollection|Collection
+    /*public function getStats(): ArrayCollection|Collection
     {
         return $this->stats;
     }
@@ -281,11 +301,11 @@ class UserCharacter
         if($value != null) {
             $newStat->setStat($stat);
             $newStat->setValue($value);
-            $newStat->setCharacter($this);
+            $newStat->setFighter($this);
             $this->addStat($newStat);
         }
         return $newStat;
-    }
+    }*/
 
     public function getGear(): Gear
     {

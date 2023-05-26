@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\CurrencyType;
+use App\Enum\FightType;
 use App\Repository\RewardRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -140,15 +141,12 @@ class Reward
         $character = $fight->getCharacter();
         $opponent = $fight->getOpponent();
 
-        $actualLevel = $character->getLevel();
-        $passedLevel = $opponent->getLevel();
-
-        $actualRank = $character->getRanking();
-        $passedRank = $opponent->getRanking();
-
         $amount = $playerWin ? 138 : 69;
 
         //Experience
+        $actualLevel = $character->getLevel();
+        $passedLevel = $opponent->getLevel();
+
         $expAmount = round(($amount / log(UserCharacter::MAX_LEVEL)) * log($actualLevel) + 20);
 
         if(!$character->isMaxLevel()) {
@@ -158,7 +156,11 @@ class Reward
         }
 
         //Gold
-        $goldAmount = round(($expAmount * ((($passedLevel / $actualLevel) + (($passedRank / $actualRank) * 1.25)) / 2)) * 1.10);
+        if($fight->getFightType() == FightType::PVP) {
+            $goldAmount = round(($expAmount * ((($passedLevel / $actualLevel) + (($opponent->getRanking() / $character->getRanking()) * 1.25)) / 2)) * 1.10);
+        } else {
+            $goldAmount = 500 * $passedLevel;
+        }
 
         $currency = new Currency();
         $currency->setCurrency(CurrencyType::GOLD);
@@ -170,27 +172,34 @@ class Reward
         $this->addCurrency($currency);
 
         //Ranking
-        $rankAmount = round(15 * ((($passedLevel / $actualLevel) + (($passedRank / $actualRank) * 1.2)) / 2));
-        if(!$playerWin) {
-            $rankAmount = -$rankAmount;
-        }
+        if($fight->getFightType() == FightType::PVP) {
+            $actualRank = $character->getRanking();
+            $passedRank = $opponent->getRanking();
 
-        if($playerWin) {
-            if ($character->isMaxRank()) {
-                $this->setRanking(0);
-            } else {
-                if (($character->getRanking() + $rankAmount) < UserCharacter::MAX_RANK ) {
-                    $this->setRanking($rankAmount);
+            $rankAmount = round(15 * ((($passedLevel / $actualLevel) + (($passedRank / $actualRank) * 1.2)) / 2));
+            if (!$playerWin) {
+                $rankAmount = -$rankAmount;
+            }
+
+            if ($playerWin) {
+                if ($character->isMaxRank()) {
+                    $this->setRanking(0);
                 } else {
-                    $this->setRanking(UserCharacter::MAX_RANK - $character->getRanking());
+                    if (($character->getRanking() + $rankAmount) < UserCharacter::MAX_RANK) {
+                        $this->setRanking($rankAmount);
+                    } else {
+                        $this->setRanking(UserCharacter::MAX_RANK - $character->getRanking());
+                    }
+                }
+            } else {
+                if (($character->getRanking() - $rankAmount) < 0) {
+                    $this->setRanking(0);
+                } else {
+                    $this->setRanking($rankAmount);
                 }
             }
         } else {
-            if (($character->getRanking() - $rankAmount) < 0) {
-                $this->setRanking(0);
-            } else {
-                $this->setRanking($rankAmount);
-            }
+            $this->setRanking(0);
         }
 
         //Todo Items
