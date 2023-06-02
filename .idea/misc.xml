@@ -4,40 +4,28 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="14289" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/SocketController.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="4788" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Repository/FightRepository.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1037" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Hero.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1792" />
+          <option name="caretOffset" value="1832" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/TempFight.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="963" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Fighter.php" />
+          <option name="caretOffset" value="4399" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Reward.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="714" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/BaseCharacterItem.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="467" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/CharacterItem.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="925" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Inventory.php" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="2700" />
+          <option name="caretOffset" value="841" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Fight.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="1193" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/Hero.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="3808" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Repository/FightRepository.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="11445" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/SocketController.php" />
         </OpenedFileInfo>
       </list>
     </option>

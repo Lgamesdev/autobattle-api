@@ -100,7 +100,7 @@ class Wallet
 
         $characterGold = $currencyMatched->first()->getAmount();
 
-        if ($characterGold > $item->getCost()) {
+        if ($characterGold >= $item->getCost()) {
             $this->currencies[$currencyMatched->key()]->setAmount($characterGold - $item->getCost());
             if($item instanceof Equipment) {
                 $characterEquipment = new CharacterEquipment($item);

@@ -8,4 +8,5 @@ enum EquipmentSlot: string
     case CHEST = 'Chest';
     case PANTS = 'Pants';
     case WEAPON = 'Weapon';
+    case OFFHAND = 'OffHand';
 }

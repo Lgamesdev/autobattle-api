@@ -18,10 +18,6 @@ use JMS\Serializer\Annotation\VirtualProperty;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[Entity(repositoryClass: CurrencyRepository::class)]
-#[UniqueEntity(
-    fields: ['character', 'stat'],
-    message: 'This character stat already got a value'
-)]
 class Currency
 {
     #[Exclude]

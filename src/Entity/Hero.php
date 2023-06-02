@@ -36,7 +36,7 @@ class Hero extends Fighter
     #[Exclude]
     private ?int $id = null;*/
 
-    #[Column(type: Types::STRING, unique: true)]
+    #[Column(type: Types::STRING)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 25)]
     private string $username;

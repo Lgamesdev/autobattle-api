@@ -51,9 +51,18 @@ class Fight
     #[OneToMany(mappedBy: 'fight', targetEntity: Action::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $actions;
 
-    #[Groups(['fight'])]
+    /*#[Groups(['fight'])]
     #[OneToOne(mappedBy: 'fight', targetEntity: Reward::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Reward $reward;*/
+
+    #[Groups(['lootBox'])]
+    #[ManyToOne(targetEntity: Reward::class, cascade: ['persist', 'remove'])]
+    #[JoinColumn(name: 'reward_id', referencedColumnName: 'id')]
     private Reward $reward;
+
+    #[Groups(['fight'])]
+    #[Column(type: Types::BOOLEAN)]
+    private bool $playerWin = false;
 
     public function __construct()
     {
@@ -135,6 +144,22 @@ class Fight
         $this->reward = $reward;
     }
 
+    /**
+     * @return bool
+     */
+    public function isPlayerWin(): bool
+    {
+        return $this->playerWin;
+    }
+
+    /**
+     * @param bool $playerWin
+     */
+    public function setPlayerWin(bool $playerWin): void
+    {
+        $this->playerWin = $playerWin;
+    }
+
     public function generate(): void
     {
         $characterStats = $this->character->getFullStats();
@@ -207,9 +232,11 @@ class Fight
             }
         }
 
+        $this->setPlayerWin(($characterHealth > 0));
+
         $reward = new Reward();
+        $reward->generate($this);
         $this->setReward($reward);
-        $reward->generate($this, ($characterHealth > 0));
     }
 
     public static function getSerializationContext(): Context|SerializationContext

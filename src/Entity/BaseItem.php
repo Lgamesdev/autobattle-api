@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\CurrencyType;
+use App\Enum\ItemQuality;
 use App\Repository\BaseItemRepository;
 use App\Repository\ItemRepository;
 use App\Trait\EntityItemTrait;
@@ -16,12 +18,23 @@ use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\InheritanceType;
 use Doctrine\ORM\Mapping\MappedSuperclass;
+use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\SerializedName;
+use JMS\Serializer\Annotation\VirtualProperty;
 
 #[Entity(repositoryClass: BaseItemRepository::class)]
+#[UniqueEntity(
+    fields: ['name', 'itemQuality'],
+    message: 'This item already exists in this quality',
+)]
 #[InheritanceType('JOINED')]
 #[DiscriminatorColumn(name: 'type', type: Types::STRING)]
-#[DiscriminatorMap(['item' => Item::class, 'equipment' => Equipment::class])]
+#[DiscriminatorMap([
+    'item' => Item::class,
+    'equipment' => Equipment::class,
+    'lootBox' => LootBox::class,
+])]
 abstract class BaseItem
 {
     #[Groups(['shopList'])]
@@ -31,7 +44,7 @@ abstract class BaseItem
     protected ?int $id = null;
 
     #[Groups(['playerInventory', 'gear', 'shopList'])]
-    #[Column(type: Types::STRING, unique: true)]
+    #[Column(type: Types::STRING)]
     protected string $name;
 
     #[Groups(['playerInventory', 'gear', 'shopList'])]
@@ -41,6 +54,10 @@ abstract class BaseItem
     #[Groups(['playerInventory', 'shopList'])]
     #[Column(type: Types::BOOLEAN)]
     protected bool $isDefaultItem = true;
+
+    #[Exclude]
+    #[Column(type: 'string', enumType: ItemQuality::class)]
+    protected ItemQuality $itemQuality = ItemQuality::NORMAL;
 
     public function getId(): ?int
     {
@@ -75,5 +92,23 @@ abstract class BaseItem
     public function setIsDefaultItem(bool $isDefaultItem): void
     {
         $this->isDefaultItem = $isDefaultItem;
+    }
+
+    public function getItemQuality(): ItemQuality
+    {
+        return $this->itemQuality;
+    }
+
+    public function setItemQuality(ItemQuality $itemQuality): void
+    {
+        $this->itemQuality = $itemQuality;
+    }
+
+    #[Groups(['playerInventory', 'gear', 'shopList'])]
+    #[VirtualProperty]
+    #[SerializedName('itemQuality')]
+    public function getItemQualityValue(): string
+    {
+        return $this->itemQuality->value;
     }
 }

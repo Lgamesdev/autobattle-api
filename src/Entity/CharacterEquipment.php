@@ -63,7 +63,14 @@ class CharacterEquipment extends BaseCharacterItem
 
     public function addModifier(CharacterEquipmentModifier $stat): self
     {
-        if (!$this->modifiers->contains($stat)) {
+        $statsMatched = $this->modifiers->filter(function($element) use ($stat) {
+            return $element->getStatType() === $stat->getStatType();
+        });
+
+        if($statsMatched->count() > 0) {
+            $statValue = $statsMatched->first()->getValue();
+            $this->modifiers[$statsMatched->key()]->setValue($statValue + $stat->getValue());
+        } else {
             $this->modifiers[] = $stat;
             $stat->setCharacterEquipment($this);
         }

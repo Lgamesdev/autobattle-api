@@ -242,13 +242,16 @@ class SocketController
                 );
         }
 
+        echo "close connection of " . $this->users[$conn->resourceId]['username'] . "\n";
+        dump($this->users[$conn->resourceId]);
+
         unset($this->users[$conn->resourceId]);
         $this->connections->detach($conn);
     }
 
     public function handleError(ConnectionInterface $conn, Exception $e): void
     {
-        $this->writeToConsole('new error : ' . $e->getMessage() . ' of type : ' . $e::class);
+        echo 'new error : ' . $e->getMessage() . ' of type : ' . $e::class;
         switch ($e::class) {
             case FightException::class:
             case CharacterEquipmentException::class:
@@ -282,6 +285,8 @@ class SocketController
         if (array_key_exists($channel, $this->users[$conn->resourceId]['channels'])) {
             throw new Exception('already subscribed to channel ' . $channel);
         }
+
+        $this->users[$conn->resourceId]['channels'][$channel] = $channel;
 
         switch ($channel) {
             case SocketChannel::DEFAULT->value:
@@ -328,8 +333,6 @@ class SocketController
                             $this->users[$conn->resourceId]['tempFight']
                                 = new TempFight($this->getCharacter($username), $opponent, $fightType);
 
-                            echo "generating pve fight \n";
-
                             $conn->send(json_encode([
                                 'action' => SocketSendAction::FIGHT_START,
                                 'channel' => SocketChannel::FIGHT_SUFFIX->value . $username,
@@ -341,6 +344,7 @@ class SocketController
                                 )
                             ]));
 
+                            $this->handleFightOver($conn, $username);
                             //$this->attack($conn, $username);
                         } else {
                             throw new FightException('fightType not found');
@@ -357,7 +361,6 @@ class SocketController
                 return;
         }
 
-        $this->users[$conn->resourceId]['channels'][$channel] = $channel;
         $this->sendMessageToChannel(
             $conn,
             $channel,
@@ -636,28 +639,36 @@ class SocketController
             )
         ]));
 
+        $this->handleFightOver($conn, $username);
+    }
+
+    private function handleFightOver(ConnectionInterface $conn, string $username): void
+    {
         if($this->users[$conn->resourceId]['tempFight']->fightIsOver())
         {
-            $callbackMessages = $this->handleReward($this->users[$conn->resourceId]['tempFight']->getReward());
+            $callbackMessages = $this->handleReward($this->users[$conn->resourceId]['tempFight']->getFight());
 
             $this->entityManager->persist($this->users[$conn->resourceId]['tempFight']->getFight());
             $this->entityManager->flush();
 
-            /*echo $username . 'fight\'s over, result : ' . $this->serializer->serialize(
-                $this->users[$conn->resourceId]['tempFight']->getReward(),
-                'json',
-                Fight::getSerializationContext()
-            ) . "\n";*/
+            echo $username . 'fight\'s over, result : ' . $this->serializer->serialize([
+                    'playerWin' => $this->users[$conn->resourceId]['tempFight']->getFight()->isPlayerWin(),
+                    'reward' => $this->users[$conn->resourceId]['tempFight']->getReward(),
+                ],
+                    'json',
+                    Fight::getSerializationContext())
+                . "\n";
 
             $conn->send(json_encode([
                 'action' => SocketSendAction::FIGHT_OVER,
                 'channel' => SocketChannel::FIGHT_SUFFIX->value . $username,
                 'username' => $this->botName,
-                'content' => $this->serializer->serialize(
-                    $this->users[$conn->resourceId]['tempFight']->getReward(),
+                'content' => $this->serializer->serialize([
+                    'playerWin' => $this->users[$conn->resourceId]['tempFight']->getFight()->isPlayerWin(),
+                    'reward' => $this->users[$conn->resourceId]['tempFight']->getReward(),
+                ],
                     'json',
-                    Fight::getSerializationContext()
-                )
+                    Fight::getSerializationContext())
             ]));
 
             foreach ($callbackMessages as $message)
@@ -668,11 +679,12 @@ class SocketController
         }
     }
 
-    private function handleReward(Reward $reward): ArrayCollection
+    private function handleReward(Fight $fight): ArrayCollection
     {
         $callbackMessages = new ArrayCollection();
 
-        $character = $reward->getFight()->getCharacter();
+        $reward = $fight->getReward();
+        $character = $fight->getCharacter();
 
         echo $character->getUsername() . ' (lvl. ' . $character->getLevel() . ') gained xp ' . $reward->getExperience()
             . ' (actual xp : ' . $character->getExperience() . ' / ' . $character->calculateRequiredExperienceForLevel() . ") \n";
@@ -719,7 +731,8 @@ class SocketController
         }
         $character->addRanking($reward->getRanking());
 
-        if($reward->getFight()->getFightType() == FightType::PVE && $reward->getPlayerWin()) {
+        if($fight->getFightType() == FightType::PVE
+            && $fight->isPlayerWin()) {
             $character->addHeroDefeated();
         }
 

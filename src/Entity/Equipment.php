@@ -59,7 +59,14 @@ class Equipment extends BaseItem
 
     public function addStat(EquipmentStat $stat): self
     {
-        if (!$this->stats->contains($stat)) {
+        $statsMatched = $this->stats->filter(function($element) use ($stat) {
+            return $element->getStatType() === $stat->getStatType();
+        });
+
+        if($statsMatched->count() > 0) {
+            $statValue = $statsMatched->first()->getValue();
+            $this->stats[$statsMatched->key()]->setValue($statValue + $stat->getValue());
+        } else {
             $this->stats[] = $stat;
             $stat->setEquipment($this);
         }

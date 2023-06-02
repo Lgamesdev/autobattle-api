@@ -22,7 +22,8 @@ use JMS\Serializer\Annotation\Groups;
 #[DiscriminatorColumn(name: 'type', type: Types::STRING)]
 #[DiscriminatorMap([
     'character_item' => CharacterItem::class,
-    'character_equipment' => CharacterEquipment::class
+    'character_equipment' => CharacterEquipment::class,
+    'character_lootbox' => CharacterLootBox::class,
 ])]
 abstract class BaseCharacterItem
 {

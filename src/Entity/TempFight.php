@@ -59,7 +59,8 @@ class TempFight
         $this->fight->setCharacter($player);
         $this->fight->setOpponent($opponent);
 
-        $this->isPlayerTurn = $this->playerStats->get(StatType::AGILITY->value) >= $this->opponentStats->get(StatType::AGILITY->value);
+        $this->isPlayerTurn = ($this->playerStats->get(StatType::AGILITY->value) /
+           ($this->playerStats->get(StatType::AGILITY->value) + $this->opponentStats->get(StatType::AGILITY->value)) * 100) >= rand(0, 100);
 
         if(!$this->isPlayerTurn)
         {
@@ -206,12 +207,12 @@ class TempFight
                 $characterArmor = $this->playerStats->get(StatType::ARMOR->value);
                 $damage -= ($damage - $characterArmor) > 0 ? $characterArmor : $damage;
                 $this->actualPlayerLife -= $damage;
-                //echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
+                echo "player parry " . $damage . " current life : " . $this->actualPlayerLife . "\n";
             } else {
                 $opponentArmor = $this->opponentStats->get(StatType::ARMOR->value);
                 $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
                 $this->actualOpponentLife -= $damage;
-                //echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
+                echo "opponent parry " . $damage . " current life : " . $this->actualOpponentLife . "\n";
             }
 
         } else {
@@ -264,13 +265,13 @@ class TempFight
                     $opponentArmor = $this->opponentStats->get(StatType::ARMOR->value);
                     $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
                     $this->actualOpponentLife -= $damage;
-                    //echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
+                    echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
                 } else {
                     $energyGained = 0;
                     $characterArmor = $this->playerStats->get(StatType::ARMOR->value);
                     $damage -= ($damage - $characterArmor) > 0 ? $characterArmor : $damage;
                     $this->actualPlayerLife -= $damage;
-                    //echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
+                    echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
                 }
             }
         }
@@ -281,8 +282,8 @@ class TempFight
                 : $energyGained;
             $this->actualPlayerEnergy += $energyGained;
         } else {
-            $energyGained = ($this->actualPlayerEnergy + $energyGained) > 100 ?
-                100 - $this->actualPlayerEnergy
+            $energyGained = ($this->actualOpponentEnergy + $energyGained) > 100 ?
+                100 - $this->actualOpponentEnergy
                 : $energyGained;
             $this->actualOpponentEnergy += $energyGained;
         }
@@ -292,9 +293,10 @@ class TempFight
 
         if($this->fightIsOver())
         {
+            $this->fight->setPlayerWin($this->actualPlayerLife > 0);
+
             $reward = new Reward();
-            $reward->generate($this->fight, $this->actualPlayerLife > 0);
-            $reward->setFight($this->fight);
+            $reward->generate($this->fight);
             $this->fight->setReward($reward);
         }
 
