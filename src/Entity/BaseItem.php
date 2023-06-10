@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Enum\CurrencyType;
 use App\Enum\ItemQuality;
+use App\Enum\ItemType;
 use App\Repository\BaseItemRepository;
 use App\Repository\ItemRepository;
 use App\Trait\EntityItemTrait;
@@ -37,23 +38,27 @@ use JMS\Serializer\Annotation\VirtualProperty;
 ])]
 abstract class BaseItem
 {
-    #[Groups(['shopList'])]
+    #[Groups(['playerInventory', 'gear', 'shopList', 'lootBox'])]
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
     protected ?int $id = null;
 
-    #[Groups(['playerInventory', 'gear', 'shopList'])]
+    #[Groups(['playerInventory', 'gear', 'shopList', 'lootBox'])]
     #[Column(type: Types::STRING)]
     protected string $name;
 
-    #[Groups(['playerInventory', 'gear', 'shopList'])]
+    #[Groups(['playerInventory', 'gear', 'shopList', 'lootBox'])]
     #[Column(type: Types::STRING)]
     protected string $iconPath;
 
-    #[Groups(['playerInventory', 'shopList'])]
+    /*#[Groups(['playerInventory', 'shopList'])]
     #[Column(type: Types::BOOLEAN)]
-    protected bool $isDefaultItem = true;
+    protected bool $isDefaultItem = true;*/
+
+    #[Exclude]
+    #[Column(type: 'string', enumType: ItemType::class)]
+    protected ItemType $itemType;
 
     #[Exclude]
     #[Column(type: 'string', enumType: ItemQuality::class)]
@@ -84,7 +89,7 @@ abstract class BaseItem
         $this->iconPath = $iconPath;
     }
 
-    public function isDefaultItem(): bool
+    /*public function isDefaultItem(): bool
     {
         return $this->isDefaultItem;
     }
@@ -92,6 +97,24 @@ abstract class BaseItem
     public function setIsDefaultItem(bool $isDefaultItem): void
     {
         $this->isDefaultItem = $isDefaultItem;
+    }*/
+
+    public function getItemType(): ItemType
+    {
+        return $this->itemType;
+    }
+
+    public function setItemType(ItemType $itemType): void
+    {
+        $this->itemType = $itemType;
+    }
+
+    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList', 'lootBox'])]
+    #[VirtualProperty]
+    #[SerializedName('itemType')]
+    public function getItemTypeValue(): string
+    {
+        return $this->itemType->value;
     }
 
     public function getItemQuality(): ItemQuality
@@ -104,7 +127,7 @@ abstract class BaseItem
         $this->itemQuality = $itemQuality;
     }
 
-    #[Groups(['playerInventory', 'gear', 'shopList'])]
+    #[Groups(['playerInventory', 'gear', 'shopList', 'lootBox'])]
     #[VirtualProperty]
     #[SerializedName('itemQuality')]
     public function getItemQualityValue(): string

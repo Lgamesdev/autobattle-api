@@ -13,6 +13,7 @@ enum SocketReceiveAction : string
     case TRY_SELL_ITEM = 'trySellItem';
     case GET_RANK_LIST = 'getRankList';
     case TRY_ADD_STAT_POINT = 'tryAddStatPoint';
+    case TRY_OPEN_LOOTBOX = 'tryOpenLootBox';
     case TRY_EQUIP = 'tryEquip';
     case TRY_UN_EQUIP = 'tryUnEquip';
     case TRY_ATTACK = 'tryAttack';

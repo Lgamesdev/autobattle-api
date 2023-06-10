@@ -31,18 +31,6 @@ class Reward
     #[Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    /*#[ManyToOne(targetEntity: Fight::class, inversedBy: 'reward')]
-    #[JoinColumn(name: 'fight_id', referencedColumnName: 'id')]
-    private Fight $fight;*/
-
-/*    #[Exclude]
-    #[Column(type: 'string', enumType: CurrencyType::class)]
-    private RewardType $rewardType;*/
-
-    /*#[Groups(['fight'])]
-    #[Column(type: Types::BOOLEAN)]
-    private bool $playerWin;*/
-
     #[Groups(['fight'])]
     #[Column(type: Types::INTEGER)]
     private int $experience = 0;
@@ -52,23 +40,29 @@ class Reward
     private int $ranking = 0;
 
     #[Groups(['fight', 'lootBox'])]
-    #[ManyToMany(targetEntity: Currency::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ManyToMany(targetEntity: Currency::class, cascade: ['persist'], orphanRemoval: true)]
     #[JoinTable(name: 'reward_currencies')]
     #[JoinColumn(name: 'reward_id', referencedColumnName: 'id')]
     #[InverseJoinColumn(name: 'currency_id', referencedColumnName: 'id', unique: true)]
     private Collection $currencies;
 
     #[Groups(['fight', 'lootBox'])]
-    #[ManyToMany(targetEntity: BaseItem::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ManyToMany(targetEntity: BaseCharacterItem::class, orphanRemoval: true)]
     #[JoinTable(name: 'reward_items')]
     #[JoinColumn(name: 'reward_id', referencedColumnName: 'id')]
     #[InverseJoinColumn(name: 'item_id', referencedColumnName: 'id', unique: true)]
     private Collection $items;
 
-    public function __construct()
+    public function __construct(ArrayCollection $items = null)
     {
         $this->currencies = new ArrayCollection();
-        $this->items = new ArrayCollection();
+
+        if($items != null)
+        {
+            $this->items = $items;
+        } else {
+            $this->items = new ArrayCollection();
+        }
     }
 
     public function getId(): ?int
@@ -152,7 +146,12 @@ class Reward
         return $this->items;
     }
 
-    public function addItem(BaseItem $item): self
+    public function setItems(ArrayCollection $items)
+    {
+        $this->items = $items;
+    }
+
+    public function addItem(BaseCharacterItem $item): self
     {
         if (!$this->items->contains($item)) {
             $this->items->add($item);

@@ -179,6 +179,8 @@ class TempFight
 
     private function createAction(FightActionType $actionType): Action
     {
+        //echo "create action \n";
+
         $action = new Action();
         $action->setPlayerTeam($this->isPlayerTurn);
         $action->setActionType($actionType);
@@ -207,12 +209,12 @@ class TempFight
                 $characterArmor = $this->playerStats->get(StatType::ARMOR->value);
                 $damage -= ($damage - $characterArmor) > 0 ? $characterArmor : $damage;
                 $this->actualPlayerLife -= $damage;
-                echo "player parry " . $damage . " current life : " . $this->actualPlayerLife . "\n";
+                //echo "player parry " . $damage . " current life : " . $this->actualPlayerLife . "\n";
             } else {
                 $opponentArmor = $this->opponentStats->get(StatType::ARMOR->value);
                 $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
                 $this->actualOpponentLife -= $damage;
-                echo "opponent parry " . $damage . " current life : " . $this->actualOpponentLife . "\n";
+                //echo "opponent parry " . $damage . " current life : " . $this->actualOpponentLife . "\n";
             }
 
         } else {
@@ -265,13 +267,13 @@ class TempFight
                     $opponentArmor = $this->opponentStats->get(StatType::ARMOR->value);
                     $damage -= ($damage - $opponentArmor) > 0 ? $opponentArmor : $damage;
                     $this->actualOpponentLife -= $damage;
-                    echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
+                    //echo "opponent takes " . $damage . " current life : " . $this->actualOpponentLife . "\n";
                 } else {
                     $energyGained = 0;
                     $characterArmor = $this->playerStats->get(StatType::ARMOR->value);
                     $damage -= ($damage - $characterArmor) > 0 ? $characterArmor : $damage;
                     $this->actualPlayerLife -= $damage;
-                    echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
+                    //echo "player takes " . $damage . " current life : " . $this->actualPlayerLife . "\n";
                 }
             }
         }

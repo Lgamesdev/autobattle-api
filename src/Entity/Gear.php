@@ -45,7 +45,7 @@ class Gear
 
     #[Groups(['gear', 'fighter', 'opponent_fighter'])]
     #[ManyToMany(targetEntity: CharacterEquipment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[JoinTable(name: 'gear_character_equipments')]
+    #[JoinTable(name: 'gear_equipments')]
     #[JoinColumn(name: 'gear_id', referencedColumnName: 'id')]
     #[InverseJoinColumn(name: 'character_equipment_id', referencedColumnName: 'id', unique: true)]
     private Collection $equipments;

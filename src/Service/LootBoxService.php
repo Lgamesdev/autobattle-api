@@ -7,7 +7,9 @@ use App\Entity\CharacterEquipmentModifier;
 use App\Entity\EquipmentStat;
 use App\Entity\CharacterLootBox;
 use App\Entity\Reward;
+use App\Exception\UserCharacterException;
 use App\Repository\EquipmentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 
 class LootBoxService
@@ -24,7 +26,10 @@ class LootBoxService
         $this->em = $em;
     }
 
-    public function openLootBox(CharacterLootBox $lootBox): CharacterEquipment
+    /**
+     * @throws UserCharacterException
+     */
+    public function openLootBox(CharacterLootBox $lootBox): CharacterLootBox
     {
         $character = $lootBox->getCharacter();
 
@@ -33,14 +38,7 @@ class LootBoxService
 
         $equipment = $equipments[array_rand($equipments)];
 
-        $reward = new Reward();
-        $reward->addItem($equipment);
-        $lootBox->setReward($reward);
-
-        $this->em->persist($reward);
-
-        $characterEquipment = new CharacterEquipment();
-        $characterEquipment->setItem($equipment);
+        $characterEquipment = new CharacterEquipment($equipment);
 
         /** @var EquipmentStat $stat */
         foreach ($characterEquipment->getItem()->getStats() as $stat)
@@ -54,11 +52,26 @@ class LootBoxService
             }
         }
 
+        $reward = new Reward(new ArrayCollection(array($characterEquipment)));
+        $lootBox->setReward($reward);
+
         $character->addToInventory($characterEquipment);
 
-        $this->em->persist($character);
-        $this->em->flush();
+        $this->em->persist($characterEquipment);
 
-        return $characterEquipment;
+        try {
+            $character->removeFromInventory($lootBox);
+        } catch (UserCharacterException $e) {
+            throw new UserCharacterException('error while removing lootbox from inventory : ' . $e->getMessage());
+        }
+
+        if($this->em->isOpen()) {
+            $this->em->persist($character);
+            $this->em->flush();
+        } else {
+            echo "/!\ error : entity manager closed \n";
+        }
+
+        return $lootBox;
     }
 }

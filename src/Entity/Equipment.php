@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\EquipmentSlot;
+use App\Enum\ItemType;
 use App\Enum\StatType;
 use App\Repository\EquipmentRepository;
 use App\Trait\EntityEquipmentTrait;
@@ -24,26 +25,28 @@ use Symfony\Component\Validator\Constraints\Range;
 class Equipment extends BaseItem
 {
     #[Exclude]
+    protected ItemType $itemType = ItemType::EQUIPMENT;
+
     #[Column(type: 'string', enumType: EquipmentSlot::class)]
     protected EquipmentSlot $equipmentSlot;
 
-    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList', 'lootBox'])]
     #[OneToMany(mappedBy: 'equipment', targetEntity: EquipmentStat::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     protected Collection $stats;
 
-    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList', 'lootBox'])]
     #[Column(type: Types::INTEGER)]
     protected int $spriteId;
 
-    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
-    protected bool $isDefaultItem = false;
+    /*#[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    protected bool $isDefaultItem = false;*/
 
-    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList', 'lootBox'])]
     #[Column(type: Types::INTEGER)]
     #[Range(min: 1, max: 100)]
     protected int $requiredLevel;
 
-    #[Groups(['gear', 'playerInventory', 'shopList'])]
+    #[Groups(['gear', 'playerInventory', 'shopList', 'lootBox'])]
     #[Column(type: Types::INTEGER)]
     protected int $cost;
 
@@ -94,7 +97,7 @@ class Equipment extends BaseItem
         $this->equipmentSlot = EquipmentSlot::from($value);
     }
 
-    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList'])]
+    #[Groups(['gear', 'fighter', 'opponent_fighter', 'playerInventory', 'shopList', 'lootBox'])]
     #[VirtualProperty]
     #[SerializedName('equipmentSlot')]
     public function getEquipmentSlotValue(): string

@@ -27,7 +27,7 @@ use JMS\Serializer\Annotation\Groups;
 ])]
 abstract class BaseCharacterItem
 {
-    #[Groups(['playerInventory', 'gear'])]
+    #[Groups(['playerInventory', 'gear', 'lootBox'])]
     #[Id]
     #[GeneratedValue]
     #[Column(type: Types::INTEGER)]
@@ -37,7 +37,7 @@ abstract class BaseCharacterItem
     #[JoinColumn(name: 'character_id', referencedColumnName: 'id')]
     protected UserCharacter $character;
 
-    #[Groups(['playerInventory'])]
+    #[Groups(['playerInventory', 'lootBox'])]
     #[Column(type: Types::INTEGER)]
     protected int $amount = 1;
 

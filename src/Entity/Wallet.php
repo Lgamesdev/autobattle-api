@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\CurrencyType;
+use App\Enum\ItemType;
 use App\Exception\ShopException;
+use App\Exception\UserCharacterException;
 use App\Repository\WalletRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -91,8 +93,9 @@ class Wallet
 
     /**
      * @throws ShopException
+     * @throws UserCharacterException
      */
-    public function tryBuy(Item|Equipment $item): CharacterItem|CharacterEquipment|null
+    public function tryBuy(Item|LootBox|Equipment $item): CharacterItem|CharacterLootBox|CharacterEquipment|null
     {
         $currencyMatched = $this->currencies->filter(function($element) {
             return $element->getCurrency() === CurrencyType::GOLD;
@@ -102,21 +105,33 @@ class Wallet
 
         if ($characterGold >= $item->getCost()) {
             $this->currencies[$currencyMatched->key()]->setAmount($characterGold - $item->getCost());
-            if($item instanceof Equipment) {
-                $characterEquipment = new CharacterEquipment($item);
-                $this->character->addToInventory($characterEquipment);
-                return $characterEquipment;
-            } else {
-                $characterItem = new CharacterItem($item);
-                $this->character->addToInventory($characterItem);
-                return $characterItem;
+            switch($item->getItemType())
+            {
+                case ItemType::LOOTBOX:
+                    $characterLootBox = new CharacterLootBox($item);
+                    $this->character->addToInventory($characterLootBox);
+                    return $characterLootBox;
+
+                case ItemType::EQUIPMENT:
+                    $characterEquipment = new CharacterEquipment($item);
+                    $this->character->addToInventory($characterEquipment);
+                    return $characterEquipment;
+
+                case ItemType::Item:
+                default:
+                    $characterItem = new CharacterItem($item);
+                    $this->character->addToInventory($characterItem);
+                    return $characterItem;
             }
         } else {
             throw new ShopException('Cannot afford item for ' . $item->getCost() . 'gold');
         }
     }
 
-    public function sell(CharacterEquipment|CharacterItem $characterItem): bool
+    /**
+     * @throws UserCharacterException
+     */
+    public function sell(CharacterEquipment|CharacterLootBox|CharacterItem $characterItem): void
     {
         $currencyMatched = $this->currencies->filter(function($element) {
             return $element->getCurrency() === CurrencyType::GOLD;
@@ -124,6 +139,6 @@ class Wallet
 
         $characterGold = $currencyMatched->first()->getAmount();
         $this->currencies[$currencyMatched->key()]->setAmount($characterGold + $characterItem->getItem()->getCost());
-        return $this->character->getInventory()->getItems()->removeElement($characterItem);
+        $this->character->removeFromInventory($characterItem);
     }
 }

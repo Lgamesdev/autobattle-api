@@ -15,6 +15,7 @@ enum SocketSendAction : string
     case SELL_ITEM = 'sellItem';
     case RANK_LIST = 'rankList';
     case ADD_STAT_POINT = 'addStatPoint';
+    case OPEN_LOOTBOX = 'openLootBox';
     case EQUIP = 'equip';
     case UN_EQUIP = 'unEquip';
     case FIGHT_START = 'fightStart';

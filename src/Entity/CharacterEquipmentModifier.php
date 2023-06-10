@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\Groups;
@@ -17,10 +18,6 @@ use JMS\Serializer\Annotation\VirtualProperty;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[Entity(repositoryClass: CharacterEquipmentStatRepository::class)]
-#[UniqueEntity(
-    fields: ['character', 'equipment', 'equipmentSlot'],
-    message: 'This equipmentSlot is already used.'
-)]
 class CharacterEquipmentModifier
 {
     #[Id]
@@ -30,13 +27,14 @@ class CharacterEquipmentModifier
     private ?int $id = null;
 
     #[ManyToOne(targetEntity: CharacterEquipment::class, inversedBy: 'modifiers')]
+    #[JoinColumn(name: 'character_equipment_id', referencedColumnName: 'id', onDelete: "CASCADE")]
     private CharacterEquipment $characterEquipment;
 
     #[Column(type: 'string', enumType: StatType::class)]
     #[Exclude]
     private StatType $stat;
 
-    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter'])]
+    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter', 'lootBox'])]
     #[Column(type: Types::INTEGER)]
     private int $value;
 
@@ -65,7 +63,7 @@ class CharacterEquipmentModifier
         $this->stat = $stat;
     }
 
-    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter'])]
+    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter', 'lootBox'])]
     #[VirtualProperty]
     #[SerializedName('statType')]
     public function getStatType(): string

@@ -17,18 +17,18 @@ use Doctrine\ORM\Mapping\OneToMany;
 use JMS\Serializer\Annotation\Groups;
 
 #[Entity(repositoryClass: CharacterEquipmentRepository::class)]
-#[UniqueEntity(
+/*#[UniqueEntity(
     fields: ['character', 'equipment', 'equipmentSlot'],
     message: 'This equipmentSlot is already used.'
-)]
+)]*/
 class CharacterEquipment extends BaseCharacterItem
 {
-    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter'])]
+    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter', 'lootBox'])]
     #[ManyToOne(targetEntity: Equipment::class)]
     #[JoinColumn(name: 'equipment_id', referencedColumnName: 'id')]
     protected Equipment $item;
 
-    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter'])]
+    #[Groups(['gear', 'playerInventory', 'fighter', 'opponent_fighter', 'lootBox'])]
     #[OneToMany(mappedBy: 'characterEquipment', targetEntity: CharacterEquipmentModifier::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $modifiers;
 

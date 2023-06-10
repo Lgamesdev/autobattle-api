@@ -253,7 +253,7 @@ class UserCharacter extends Fighter
     /**
      * @throws ShopException
      */
-    public function tryBuy(BaseItem $item): CharacterItem|CharacterEquipment|null
+    public function tryBuy(BaseItem $item): BaseCharacterItem
     {
         if($item instanceof Item || $item instanceof Equipment) {
             return $this->wallet->tryBuy($item);
@@ -263,12 +263,12 @@ class UserCharacter extends Fighter
     }
 
     /**
-     * @throws ShopException
+     * @throws ShopException|UserCharacterException
      */
-    public function sell(BaseCharacterItem $item): bool
+    public function sell(BaseCharacterItem $item): void
     {
-        if($item instanceof CharacterItem || $item instanceof CharacterEquipment) {
-            return $this->wallet->sell($item);
+        if($item instanceof CharacterItem || $item instanceof CharacterLootBox || $item instanceof CharacterEquipment) {
+            $this->wallet->sell($item);
         } else {
             throw new ShopException('An error occurred when trying to sell item');
         }
@@ -330,9 +330,20 @@ class UserCharacter extends Fighter
         return $this->inventory;
     }
 
-    public function addToInventory(CharacterItem|CharacterEquipment $item): void
+    /**
+     * @throws UserCharacterException
+     */
+    public function addToInventory(BaseCharacterItem $item): void
     {
         $this->inventory->addCharacterItem($item);
+    }
+
+    /**
+     * @throws UserCharacterException
+     */
+    public function removeFromInventory(BaseCharacterItem $item): void
+    {
+        $this->inventory->removeCharacterItem($item);
     }
 
     public function getFights(): ArrayCollection

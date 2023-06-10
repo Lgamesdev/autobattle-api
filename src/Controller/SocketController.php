@@ -7,7 +7,9 @@ namespace App\Controller;
 use App\Entity\BaseCharacterItem;
 use App\Entity\BaseItem;
 use App\Entity\CharacterEquipment;
+use App\Entity\CharacterLootBox;
 use App\Entity\Fight;
+use App\Entity\LootBox;
 use App\Entity\Message;
 use App\Entity\Reward;
 use App\Entity\SocketMessage;
@@ -26,6 +28,7 @@ use App\Exception\CharacterEquipmentException;
 use App\Exception\FightException;
 use App\Exception\ShopException;
 use App\Exception\UserCharacterException;
+use App\Service\LootBoxService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -42,9 +45,6 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class SocketController
 {
-    private const PVE_SUFFIX = "pve_";
-    private const PVP_SUFFIX = "pvp_";
-
     private string $botName = 'ChatBot';
     private array $users = [];
 
@@ -54,12 +54,14 @@ class SocketController
     private EntityManagerInterface $entityManager;
     private JWTTokenManagerInterface $tokenManager;
     private SerializerInterface $serializer;
+    private LootBoxService $lootBoxService;
 
     public function __construct(EventDispatcherInterface $dispatcher,
                                 TokenStorageInterface $storage,
                                 EntityManagerInterface $entityManager,
                                 JWTTokenManagerInterface $tokenManager,
-                                SerializerInterface $serializer)
+                                SerializerInterface $serializer,
+                                LootBoxService $lootBoxService)
     {
         $this->connections = new SplObjectStorage;
         $this->dispatcher = $dispatcher;
@@ -67,6 +69,7 @@ class SocketController
         $this->entityManager = $entityManager;
         $this->tokenManager = $tokenManager;
         $this->serializer = $serializer;
+        $this->lootBoxService = $lootBoxService;
     }
 
     /**
@@ -146,6 +149,11 @@ class SocketController
 
                     case SocketReceiveAction::TUTORIAL_FINISHED->value:
                         return $this->tutorialFinished($from, $username);
+
+                    case SocketReceiveAction::TRY_OPEN_LOOTBOX->value:
+                        /** @var LootBox $lootBox */
+                        $lootBox = $this->entityManager->getRepository(CharacterLootBox::class)->findOneBy(['id' => intval($content)]);
+                        return $this->openLootBox($from, $lootBox);
 
                     case SocketReceiveAction::TRY_EQUIP->value:
                         /** @var CharacterEquipment $characterEquipment */
@@ -251,7 +259,7 @@ class SocketController
 
     public function handleError(ConnectionInterface $conn, Exception $e): void
     {
-        echo 'new error : ' . $e->getMessage() . ' of type : ' . $e::class;
+        echo 'new error : ' . $e->getMessage() . ' of type : ' . $e::class . "\n";
         switch ($e::class) {
             case FightException::class:
             case CharacterEquipmentException::class:
@@ -452,6 +460,25 @@ class SocketController
         }
     }
 
+    /**
+     * @throws UserCharacterException
+     */
+    private function openLootBox(ConnectionInterface $conn, CharacterLootBox $lootBox): bool
+    {
+        $lootBox = $this->lootBoxService->openLootBox($lootBox);
+
+        $conn->send(json_encode([
+            'action' => SocketSendAction::OPEN_LOOTBOX,
+            'channel' => SocketChannel::DEFAULT,
+            'username' => $this->getUsername($conn),
+            'content' => $this->serializer->serialize($lootBox,
+                'json',
+                SerializationContext::create()->setGroups(['lootBox'])
+            )
+        ]));
+        return true;
+    }
+
     private function tutorialFinished(ConnectionInterface $conn, string $username): bool
     {
         /** @var UserCharacter $user */
@@ -590,6 +617,7 @@ class SocketController
 
     /**
      * @throws ShopException
+     * @throws UserCharacterException
      */
     private function sellItem(ConnectionInterface $conn, string $username, BaseCharacterItem $characterItem): bool
     {
@@ -598,11 +626,7 @@ class SocketController
         /** @var UserCharacter $character */
         $character = $this->getCharacter($username);
 
-        $isSold = $character->sell($characterItem);
-
-        if(!$isSold) {
-            throw new ShopException('An error has occurred when selling item');
-        }
+        $character->sell($characterItem);
 
         $this->entityManager->persist($character);
         $this->entityManager->flush();
@@ -626,6 +650,8 @@ class SocketController
             || $this->users[$conn->resourceId]['tempFight'] == null) {
             throw new FightException('No current fight found');
         }
+
+        //echo "attack \n";
 
         $actions = $this->users[$conn->resourceId]['tempFight']->attack($actionType);
         $conn->send(json_encode([
@@ -651,7 +677,7 @@ class SocketController
             $this->entityManager->persist($this->users[$conn->resourceId]['tempFight']->getFight());
             $this->entityManager->flush();
 
-            echo $username . 'fight\'s over, result : ' . $this->serializer->serialize([
+            echo $username . ' fight\'s over, result : ' . $this->serializer->serialize([
                     'playerWin' => $this->users[$conn->resourceId]['tempFight']->getFight()->isPlayerWin(),
                     'reward' => $this->users[$conn->resourceId]['tempFight']->getReward(),
                 ],

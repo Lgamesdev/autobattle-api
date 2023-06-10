@@ -80,6 +80,10 @@ class ShopController
         );
     }
 
+    /**
+     * @throws ShopException
+     * @throws \App\Exception\UserCharacterException
+     */
     #[Route('/sell/{id}', name: 'sell_character_item', methods: [Request::METHOD_PUT])]
     public function sellItem(
         BaseCharacterItem $item,
@@ -88,15 +92,15 @@ class ShopController
     {
         $character = $this->getCurrentUser()->getCharacter();
 
-        $isSelled = $character->sell($item);
+        $character->sell($item);
 
-        if(!$isSelled) {
+        /*if(!$isSelled) {
             return new JsonResponse(
                 $serializer->serialize('An error occurred during item sell', 'json'),
                 Response::HTTP_BAD_REQUEST,
                 [],
                 true);
-        }
+        }*/
 
         $entityManager->persist($character);
         $entityManager->flush();
