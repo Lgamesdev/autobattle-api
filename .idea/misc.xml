@@ -24,8 +24,20 @@
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Entity/CharacterLootBox.php" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="10886" />
+          <option name="caretOffset" value="20176" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/Controller/SocketController.php" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/docker/docker-compose.override.yml" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="369" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/docker/docker-compose.yml" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/DockerFile" />
         </OpenedFileInfo>
       </list>
     </option>
